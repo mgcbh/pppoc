@@ -5,6 +5,7 @@ import { RedirectContainer } from "./features/redirect/Redirect";
 import { PreviewContainer } from "./features/preview/Preview";
 import { StatusContainer } from "./features/status/Status";
 import { CancelContainer } from "./features/cancel/Cancel";
+import { ReviewContainer } from "./features/review/Review";
 import "./App.css";
 import { Home } from "./features/home/Home";
 
@@ -22,6 +23,7 @@ const App = () => (
         <Route path="/status/:type" element={<StatusContainer />} />
         <Route path="/cancel" element={<CancelContainer />} />
         <Route path="/redirect" element={<RedirectContainer />} />
+        <Route path="/review" element={<ReviewContainer />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </div>

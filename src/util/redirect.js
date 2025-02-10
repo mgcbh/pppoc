@@ -10,6 +10,7 @@ export const getRedirectUrl = (resultCode) => {
     case "Pending":
     case "Received":
       return "/status/pending";
+    case "Cancelled":
     case "Refused":
       return "/status/failed";
     default:

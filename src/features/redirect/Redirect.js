@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import AdyenCheckout from "@adyen/adyen-web";
-import "@adyen/adyen-web/dist/adyen.css";
+import { AdyenCheckout } from "@adyen/adyen-web";
+import "@adyen/adyen-web/styles/adyen.css";
 import { useLocation, useNavigate } from "react-router";
 import { getRedirectUrl } from "../../util/redirect";
 
