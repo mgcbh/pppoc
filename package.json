@@ -1,0 +1,52 @@
+{
+  "name": "adyen-react-online-payments",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@adyen/adyen-web": "5.68.0",
+    "@adyen/api-library": "^22.0.0",
+    "@reduxjs/toolkit": "^2.0.1",
+    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.3.0",
+    "express": "^4.21.1",
+    "morgan": "^1.10.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.2.0",
+    "react-redux": "^9.1.2",
+    "react-router": "^6.26.1",
+    "react-router-dom": "^6.26.1",
+    "uuidv4": "^6.2.13"
+  },
+  "scripts": {
+    "start": "dotenv -e .env react-scripts start",
+    "build": "dotenv -e .env react-scripts build",
+    "test": "dotenv -e .env react-scripts test",
+    "eject": "react-scripts eject",
+    "server": "npm run build && node server",
+    "server-dev": "nodemon server"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:8080",
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^16.0.1",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/jest": "^29.5.13",
+    "nodemon": "^3.1.4",
+    "react-scripts": "5.0.1"
+  }
+}
