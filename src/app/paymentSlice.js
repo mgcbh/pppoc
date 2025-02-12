@@ -6,28 +6,17 @@ export const slice = createSlice({
     error: "",
     session: null,
     orderRef: null,
-    paymentDataStoreRes: null,
     config: {
-      // storePaymentMethod: true,
-      // paymentMethodsConfiguration: {
-      //   ideal: {
-      //     showImage: true,
-      //   },
-      //   card: {
-      //     hasHolderName: true,
-      //     holderNameRequired: true,
-      //     name: "Credit or debit card",
-      //     amount: {
-      //       value: 10000, // 100€ in minor units
-      //       currency: "EUR",
-      //     },
-      //   },
-      // },
-      countryCode: "US", // Need to confirm
-      locale: "en_US",
-      showPayButton: false,
+      paymentMethodsResponse: {},
       clientKey: process.env.REACT_APP_ADYEN_CLIENT_KEY,
+      locale: "en_US",
+      countryCode: "US", // Need to get from back end?
       environment: "test",
+      showPayButton: true,
+      amount: {
+        value: 1000,
+        currency: 'USD'
+      },
       // override Security Code label
       translations: {
         'en-US': {
@@ -50,7 +39,7 @@ export const slice = createSlice({
       if (status >= 300) {
         state.error = res;
       } else {
-        [state.paymentMethods] = res;
+        state.paymentMethods = res;
       }
     },
     clearPaymentSession: (state) => {
@@ -58,18 +47,12 @@ export const slice = createSlice({
       state.session = null;
       state.orderRef = null;
     },
-    paymentDataStore: (state, action) => {
-      const [res, status] = action.payload;
-      if (status >= 300) {
-        state.error = res;
-      } else {
-        state.paymentDataStoreRes = res;
-      }
-    },
   },
 });
 
-export const { paymentSession, clearPaymentSession, paymentDataStore, paymentMethods } = slice.actions;
+export const { paymentSession,
+  clearPaymentSession,
+  paymentMethods } = slice.actions;
 
 export const initiateCheckout = (type) => async (dispatch) => {
   try {
@@ -79,8 +62,8 @@ export const initiateCheckout = (type) => async (dispatch) => {
         'Content-Type': 'application/json',
       }
     }).then(response => response.json());
-    
-    dispatch(paymentMethods(paymentMethodsResponse, paymentMethodsResponse.status));
+
+    dispatch(paymentMethods([paymentMethodsResponse, paymentMethodsResponse.status]));
   } catch (error) {
     console.error(error);
     alert("Error occurred. Look at console for details");
@@ -89,37 +72,25 @@ export const initiateCheckout = (type) => async (dispatch) => {
 
 export const savePaymentData = (data, callback) => async (dispatch) => {
   try {
-    const response = await fetch('/api/savePaymentData', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
-    }).then(response => response.json());
-    
-    if (response.ok) {
-      callback();
-    } else {
-      throw new Error("Something went wrong when saving payment data.")
-    }
+    //// WIP
+    // const response = await fetch('/api/savePaymentData', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify(data)
+    // }).then(response => response.json());
+
+    // if (response.ok) {
+    //   callback();
+    // } else {
+    //   throw new Error("Something went wrong when saving payment data.")
+    // }
+    console.log('saved data');
+    callback();
   } catch (error) {
     console.error(error);
   }
 }
-
-export const getPaymentDataStore = () => async (dispatch) => {
-  const response = await fetch("/api/getPaymentDataStore");
-  dispatch(paymentDataStore([await response.json(), response.status]));
-};
-
-export const cancelOrRefundPayment = (orderRef) => async (dispatch) => {
-  await fetch(`/api/cancelOrRefundPayment?orderRef=${orderRef}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  dispatch(getPaymentDataStore());
-};
 
 export default slice.reducer;

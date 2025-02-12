@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Card } from "@adyen/adyen-web";
 import "@adyen/adyen-web/styles/adyen.css";
-import { initiateCheckout, savePaymentData } from "../../app/paymentSlice";
+import { initiateCheckout } from "../../app/paymentSlice";
 import { getRedirectUrl } from "../../util/redirect";
 
-export const PaymentContainer = () => {
+export const TwoCardsContainer = () => {
   return (
     <div id="payment-page">
       <div className="container">
@@ -21,25 +21,9 @@ const Checkout = () => {
   const payment = useSelector(state => state.payment);
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
+  const paymentTwoContainer = useRef(null);
   const cardRef = useRef(null);
-  const { step } = useParams();
-
-  const goToReview = () => {
-    navigate('/review');
-  }
-
-  const handleGoToReview = () => {
-    // Validate the shopper input in the payment form.
-    if (cardRef.current.isValid) {
-       // Store the payment data to use in the /payments request.
-       // Pass goToReview to navigate to review if the save is successful.
-       savePaymentData(cardRef.current.data, goToReview);
-    } else {
-       // If the payment method details are invalid, trigger the validation to focus on the missing field.
-       cardRef.current.showValidation();
-    }
-  }
-
+  const cardTwoRef = useRef(null);
 
   useEffect(() => {
     dispatch(initiateCheckout());
@@ -68,11 +52,7 @@ const Checkout = () => {
       const checkout = await AdyenCheckout({
         ...config,
         paymentMethodsResponse: paymentMethods,
-        amount: {
-          value: 10000,
-          currency: 'EUR'
-        },
-        showPayButton: step === 'two' ? false : true, // Hide the pay button if this is two-step checkout.
+        showPayButton:true,
         onSubmit: async (state, component, actions) => {
           console.info("onSubmit", state, component, actions);
           try {
@@ -141,26 +121,34 @@ const Checkout = () => {
       // The 'ignore' flag is used to avoid double re-rendering caused by React 18 StrictMode
       // More about it here: https://beta.reactjs.org/learn/synchronizing-with-effects#fetching-data
       if (paymentContainer.current && !ignore) {
+        const cardConfiguration = {
+          // Optional configuration.
+          billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
+          showBrandIcon: true, // when false not showing the brand logo 
+          hasHolderName: true, // show holder name
+          holderNameRequired: true, // make holder name mandatory
+          // configure placeholders
+          placeholders: {
+            cardNumber: '1234 5678 9012 3456',
+            expiryDate: 'MM/YY',
+            securityCodeThreeDigits: '123',
+            securityCodeFourDigits: '1234',
+            holderName: 'J. Smith'
+          },
+        }
+
         if (cardRef.current === null) {
-          cardRef.current = new Card(checkout, {
-            // Optional configuration.
-            billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
-            showBrandIcon: true, // when false not showing the brand logo 
-            hasHolderName: true, // show holder name
-            holderNameRequired: true, // make holder name mandatory
-            // configure placeholders
-            placeholders: {
-              cardNumber: '1234 5678 9012 3456',
-              expiryDate: 'MM/YY',
-              securityCodeThreeDigits: '123',
-              securityCodeFourDigits: '1234',
-              holderName: 'J. Smith'
-            },
-            // onEnterKeyPressed: handleGoToReview, // May not be required
-          })
+          cardRef.current = new Card(checkout, cardConfiguration);
           
           // Mount the card component.
           cardRef.current.mount(paymentContainer.current);
+        }
+
+        if (cardTwoRef.current === null) {
+          cardTwoRef.current = new Card(checkout, cardConfiguration);
+
+          // Mount the card component.
+          cardTwoRef.current.mount(paymentTwoContainer.current);
         }
       }
     }
@@ -173,11 +161,14 @@ const Checkout = () => {
   }, [payment, navigate])
 
   return (
-    <div className="payment-container">
-      <div ref={paymentContainer} className="payment"></div>
-      {step === 'two' && 
-        <button className="button" onClick={handleGoToReview}>Continue to Review Page</button>
-      }
+    <div>
+      <div className="payment-container">
+        <div ref={paymentContainer} className="payment"></div>
+      </div>
+      <br />
+      <div className="payment-container">
+        <div ref={paymentTwoContainer} className="payment"></div>
+      </div>
     </div>
   );
 }

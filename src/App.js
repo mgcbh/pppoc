@@ -1,10 +1,10 @@
 import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
-import { PaymentContainer } from "./features/payment/Payment";
 import { RedirectContainer } from "./features/redirect/Redirect";
-import { PreviewContainer } from "./features/preview/Preview";
+import { SingleCardContainer } from "./features/payment/SingleCard";
+import { TwoCardsContainer } from "./features/payment/TwoCards";
+import { TwoStepContainer } from "./features/payment/TwoStep";
 import { StatusContainer } from "./features/status/Status";
-import { CancelContainer } from "./features/cancel/Cancel";
 import { ReviewContainer } from "./features/review/Review";
 import "./App.css";
 import { Home } from "./features/home/Home";
@@ -18,10 +18,10 @@ const App = () => (
     </header>
     <div className="container">
       <Routes>
-        <Route path="/preview/:type" element={<PreviewContainer />} />
-        <Route path="/checkout/:type" element={<PaymentContainer />} />
+        <Route path="/checkout/single-card" element={<SingleCardContainer />} />
+        <Route path="/checkout/two-cards" element={<TwoCardsContainer />} />
+        <Route path="/checkout/two-step" element={<TwoStepContainer />} />
         <Route path="/status/:type" element={<StatusContainer />} />
-        <Route path="/cancel" element={<CancelContainer />} />
         <Route path="/redirect" element={<RedirectContainer />} />
         <Route path="/review" element={<ReviewContainer />} />
         <Route path="/" element={<Home />} />

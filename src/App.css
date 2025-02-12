@@ -185,6 +185,9 @@
   padding: 0;
   width: 25px;
 }
+.review {
+  margin-top: 80px;
+}
 .cart {
   text-align: center;
   margin-top: 80px;
@@ -241,7 +244,7 @@
   margin-top: 100px;
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
   max-width: 1110px;
   padding-left: 8px;
@@ -278,6 +281,7 @@
 
 .payment-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   background: #f7f8f9;
   border: 1px solid #e6e9eb;
@@ -285,7 +289,6 @@
   padding-top: 18px;
   padding-bottom: 18px;
   width: 100%;
-  height: 100%;
 }
 
 /* end Payments page */
