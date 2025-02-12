@@ -1,3 +1,13 @@
+> **TLDR**
+
+To run this demo:
+```
+npm install
+npm run server
+```
+---
+
+
 # Adyen [online payment](https://docs.adyen.com/online-payments) integration demos
 
 ## Run this integration in seconds using [Gitpod](https://gitpod.io/)
