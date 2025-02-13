@@ -108,6 +108,7 @@ app.post("/api/paymentMethods", async (req, res) => {
     const response = await checkout.PaymentsApi.paymentMethods({
       channel: "Web",
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+      shopperReference: 'pocShopper' // HARD CODED USER FOR TESTING
     });
     res.json(response);
   } catch (err) {
@@ -184,12 +185,6 @@ app.post("/api/placeorder", async (req, res) => {
   // find shopper IP from request
   const shopperIP = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
-  // console.log('req body in placeorder: ', req.body);
-  const paymentMethod = {
-    ...req.body,
-    "type": "card"
-  }
-
   try {
     // unique ref for the transaction
     const orderRef = uuid();
@@ -204,7 +199,7 @@ app.post("/api/placeorder", async (req, res) => {
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       channel: "Web", // required
       origin: `${protocol}://${localhost}`, // required for 3ds2 native flow
-      // browserInfo: req.body.browserInfo, // required for 3ds2
+      browserInfo: req.body.browserInfo, // required for 3ds2
       shopperIP, // required by some issuers for 3ds2
       authenticationData: {
         attemptAuthentication: "always",
@@ -214,7 +209,9 @@ app.post("/api/placeorder", async (req, res) => {
         //}
       },
       returnUrl: `${protocol}://${localhost}/handleShopperRedirect?orderRef=${orderRef}`, // required for 3ds2 redirect flow
-      paymentMethod: paymentMethod,
+      paymentMethod: req.body.paymentMethod,
+      storePaymentMethod: req.body.storePaymentMethod,
+      recurringProcessingModel: req.body.recurringProcessingModel,
       // we strongly recommend that you the billingAddress in your request. 
       // card schemes require this for channel web, iOS, and Android implementations.
       // billingAddress:
@@ -225,7 +222,8 @@ app.post("/api/placeorder", async (req, res) => {
       shopperStatement: "Aceitar o pagamento até 15 dias após o vencimento.Não cobrar juros. Não aceitar o pagamento com cheque",
       // below fields are required for Klarna, line items included
       countryCode: null,
-      shopperReference: "12345",
+      shopperInteraction: req.body.shopperInteraction,
+      shopperReference: req.body.shopperReference ? req.body.shopperReference : '12345',
       shopperEmail: "youremail@email.com",
       shopperLocale: "en_US",
       lineItems: [

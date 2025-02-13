@@ -25,6 +25,13 @@ export const Home = () => {
           </Link>
         </li>
         <li className="integration-list-item">
+          <Link to="/checkout/stored-cards" className="integration-list-item-link">
+            <div className="title-container">
+              <p className="integration-list-item-title">Stored Cards</p>
+            </div>
+          </Link>
+        </li>        
+        <li className="integration-list-item">
           <Link to="/checkout/two-cards" className="integration-list-item-link">
             <div className="title-container">
               <p className="integration-list-item-title">Two Cards</p>

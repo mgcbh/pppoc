@@ -3,13 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Card } from "@adyen/adyen-web";
 import "@adyen/adyen-web/styles/adyen.css";
-import { initiateCheckout, savePaymentData } from "../../app/paymentSlice";
-import { getRedirectUrl } from "../../util/redirect";
+import { initiateCheckout } from "../../app/paymentSlice";
 import Messages from "../../components/Messages";
-
-/////////////////////////
-//  WIP
-/////////////////////////
 
 export const TwoStepContainer = () => {
   return (
@@ -27,6 +22,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
   const cardRef = useRef(null);
+  const [cardRefData, setCardRefData] = useState({});
   const [message, setMessage] = useState('');
   const [json, setJson] = useState({});
 
@@ -37,13 +33,17 @@ const Checkout = () => {
   const handleGoToReview = () => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
-      setMessage('The following will be saved to session storage before being redirected to the review page in a few seconds:');
-      setJson(cardRef.current.state.data);
+      const cardData = { 
+        ...cardRefData
+      };
+      setMessage('The following will be saved to session storage and used in the final place order click:');
+      setJson(cardData);
+
       // Store the payment data to use in the /payments request.
       // Pass goToReview to navigate to review if the save is successful.
       setTimeout(() => {
         // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
-        sessionStorage.setItem('cardData', JSON.stringify(cardRef.current.state.data));
+        sessionStorage.setItem('cardData', JSON.stringify(cardData));
         goToReview();
       }, 3000);
     } else {
@@ -80,68 +80,6 @@ const Checkout = () => {
         ...config,
         paymentMethodsResponse: paymentMethods,
         showPayButton: false, // Hide the pay button for two-step checkout.
-        onSubmit: async (state, component, actions) => {
-          try {
-            if (state.isValid) {
-              const { action, order, resultCode } = await fetch("/api/payments", {
-                method: "POST",
-                body: state.data ? JSON.stringify(state.data) : "",
-                headers: {
-                  "Content-Type": "application/json",
-                }
-              }).then(response => response.json());
-
-              if (!resultCode) {
-                console.warn("reject");
-                actions.reject();
-              }
-
-              actions.resolve({
-                resultCode,
-                action,
-                order
-              });
-            }
-          } catch (error) {
-            console.error(error);
-            actions.reject();
-          }
-        },
-        onPaymentCompleted: (result, component) => {
-          console.info("onPaymentCompleted", result, component);
-          navigate(getRedirectUrl(result.resultCode), { replace: true });
-        },
-        onPaymentFailed: (result, component) => {
-          console.info("onPaymentFailed", result, component);
-          navigate(getRedirectUrl(result.resultCode), { replace: true });
-        },
-        onError: (error, component) => {
-          console.error("onError", error.name, error.message, error.stack, component);
-          navigate(`/status/error?reason=${error.message}`, { replace: true });
-        },
-        // Used for the Native 3DS2 Authentication flow, see: https://docs.adyen.com/online-payments/3d-secure/native-3ds2/
-        onAdditionalDetails: async (state, component, actions) => {
-          console.info("onAdditionalDetails", state, component);
-          try {
-            const { resultCode } = await fetch("/api/payments/details", {
-              method: "POST",
-              body: state.data ? JSON.stringify(state.data) : "",
-              headers: {
-                "Content-Type": "application/json",
-              }
-            }).then(response => response.json());
-
-            if (!resultCode) {
-              console.warn("reject");
-              actions.reject();
-            }
-
-            actions.resolve({ resultCode });
-          } catch (error) {
-            console.error(error);
-            actions.reject();
-          }
-        }
       })
 
       // The 'ignore' flag is used to avoid double re-rendering caused by React 18 StrictMode
@@ -161,8 +99,10 @@ const Checkout = () => {
             securityCodeFourDigits: '1234',
             holderName: 'J. Smith'
           },
+          onChange: (state, component) => {
+            setCardRefData(state.data);
+          }
         }
-
 
         if (cardRef.current === null) {
           cardRef.current = new Card(checkout, cardConfiguration);

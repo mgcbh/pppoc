@@ -6,6 +6,7 @@ import { TwoCardsContainer } from "./features/payment/TwoCards";
 import { TwoStepContainer } from "./features/payment/TwoStep";
 import { StatusContainer } from "./features/status/Status";
 import { ReviewContainer } from "./features/review/Review";
+import { StoredCardsContainer } from "./features/payment/StoredCards";
 import "./App.css";
 import { Home } from "./features/home/Home";
 
@@ -21,6 +22,7 @@ const App = () => (
         <Route path="/checkout/single-card" element={<SingleCardContainer />} />
         <Route path="/checkout/two-cards" element={<TwoCardsContainer />} />
         <Route path="/checkout/two-step" element={<TwoStepContainer />} />
+        <Route path="/checkout/stored-cards" element={<StoredCardsContainer />} />
         <Route path="/status/:type" element={<StatusContainer />} />
         <Route path="/redirect" element={<RedirectContainer />} />
         <Route path="/review" element={<ReviewContainer />} />

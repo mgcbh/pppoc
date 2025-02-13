@@ -14,6 +14,7 @@ export const ReviewContainer = () => {
 
   const handlePlaceOrder = async () => {
     const cardData = sessionStorage.getItem('cardData');
+
     const response = await fetch("/api/placeorder", {
       method: "POST",
       headers: {
@@ -22,7 +23,7 @@ export const ReviewContainer = () => {
       body: cardData
     }).then(response => response.json());
 
-    const { action, order, resultCode } = response;
+    const { resultCode } = response;
 
     setResultMessage('Response from place order:')
     setResultJson(response);
