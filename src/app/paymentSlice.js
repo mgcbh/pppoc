@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 export const slice = createSlice({
   name: "payment",
   initialState: {
+    paymentMethods: null,
     error: "",
     session: null,
     orderRef: null,
@@ -46,6 +47,7 @@ export const slice = createSlice({
       state.error = "";
       state.session = null;
       state.orderRef = null;
+      state.paymentMethods = null;
     },
   },
 });

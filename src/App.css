@@ -234,19 +234,11 @@
 
 /* Payment page */
 
-#payment-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
+#review-page .container,
 #payment-page .container {
   margin-top: 100px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
   width: 100%;
-  max-width: 1110px;
+  max-width: 500px;
   padding-left: 8px;
   padding-right: 8px;
 }
@@ -291,6 +283,9 @@
   width: 100%;
 }
 
+.message, .json {
+  font-size: 0.9em;
+}
 /* end Payments page */
 
 /* Dropin page */

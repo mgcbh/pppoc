@@ -78,4 +78,9 @@ a:hover {
   user-select: all;
 }
 
+.button--small {
+  padding: 6px;
+  font-size: 0.85em;
+}
+
 /* end General page body */

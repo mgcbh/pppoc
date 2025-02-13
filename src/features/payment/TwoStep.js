@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Card } from "@adyen/adyen-web";
 import "@adyen/adyen-web/styles/adyen.css";
 import { initiateCheckout, savePaymentData } from "../../app/paymentSlice";
 import { getRedirectUrl } from "../../util/redirect";
+import Messages from "../../components/Messages";
 
 /////////////////////////
 //  WIP
@@ -26,6 +27,8 @@ const Checkout = () => {
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
   const cardRef = useRef(null);
+  const [message, setMessage] = useState('');
+  const [json, setJson] = useState({});
 
   const goToReview = () => {
     navigate('/review');
@@ -34,17 +37,20 @@ const Checkout = () => {
   const handleGoToReview = () => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
+      setMessage('The following will be saved to session storage before being redirected to the review page in a few seconds:');
+      setJson(cardRef.current.state.data);
       // Store the payment data to use in the /payments request.
       // Pass goToReview to navigate to review if the save is successful.
-      dispatch(savePaymentData(cardRef.current.state.data, goToReview));
-      // cardRef.current.unmount();
-      // goToReview();
+      setTimeout(() => {
+        // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
+        sessionStorage.setItem('cardData', JSON.stringify(cardRef.current.state.data));
+        goToReview();
+      }, 3000);
     } else {
       // If the payment method details are invalid, trigger the validation to focus on the missing field.
       cardRef.current.showValidation();
     }
   }
-
 
   useEffect(() => {
     dispatch(initiateCheckout());
@@ -175,13 +181,18 @@ const Checkout = () => {
   }, [payment, navigate])
 
   return (
-    <div>
-      <div className="payment-container mb-3">
-        <div ref={paymentContainer} className="payment"></div>
+    <>
+      <div className="mw-100">
+        <div className="payment-container mb-3">
+          <div ref={paymentContainer} className="payment"></div>
+        </div>
+        <div>
+          <button className="button" onClick={handleGoToReview}>Continue to Review Page</button>
+        </div>
+        {(message && json) && (
+          <Messages message={message} json={json} />
+        )}
       </div>
-      <div>
-        <button className="button" onClick={handleGoToReview}>Continue to Review Page</button>
-      </div>
-    </div>
+    </>
   );
 }

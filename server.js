@@ -123,6 +123,7 @@ app.post("/api/savePaymentData", async (req, res) => {
 
 // submitting a payment
 app.post("/api/payments", async (req, res) => {
+  console.log('req body: ', req.body)
   const currency = findCurrency(req.body.paymentMethod.type);
   // find shopper IP from request
   const shopperIP = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
@@ -183,6 +184,12 @@ app.post("/api/placeorder", async (req, res) => {
   // find shopper IP from request
   const shopperIP = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
 
+  // console.log('req body in placeorder: ', req.body);
+  const paymentMethod = {
+    ...req.body,
+    "type": "card"
+  }
+
   try {
     // unique ref for the transaction
     const orderRef = uuid();
@@ -197,7 +204,7 @@ app.post("/api/placeorder", async (req, res) => {
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       channel: "Web", // required
       origin: `${protocol}://${localhost}`, // required for 3ds2 native flow
-      browserInfo: req.body.browserInfo, // required for 3ds2
+      // browserInfo: req.body.browserInfo, // required for 3ds2
       shopperIP, // required by some issuers for 3ds2
       authenticationData: {
         attemptAuthentication: "always",
@@ -207,14 +214,7 @@ app.post("/api/placeorder", async (req, res) => {
         //}
       },
       returnUrl: `${protocol}://${localhost}/handleShopperRedirect?orderRef=${orderRef}`, // required for 3ds2 redirect flow
-      paymentMethod : {
-          "type": "card",
-          "holderName": "J. Smith",
-          "encryptedCardNumber": "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJ2ZXJzaW9uIjoiMSJ9.JYD1UwivUHIhoLfJCWMqv_281ohLRqef3VEGevQ-a9piFh87g60YGCP0VRNVS-anSmY2GIAdgtnv-6jBQ-M4Y5E_5B9QykuCO4WPCtolGECR4tn-m4KA3KbeKdawMn-XOpxIYPu7LhFc1EVPRwU_13YnisWHlQkH9y7ua4Oz07oqMMQm0aVP204g7KADW3erFE5HDLyjWQD_QeOBjT8Uy8NKL-DeMclNwN77HAHaCNyZP29G7RKClZsez4Yy2P_KAVA3lfJ0V_zmMjDEAWnv1wUt5jHkZAb3aCZhJaNjWbs9gzdewslRfN4ob-RV4Rc0dxwfECHG4FrjFJa5qwEiJg.--TrvV2RECLrOhMbjzmNxA.MhXG0NxHAKaRliCEYhb1Brhgw81iYfNyVQZ8k8w8rqkdfFeWb7kscNSOLVe_g_BPlkdULA30mSL7ccgNZkYPoMKsLs1hxbxMAKbYA__iCIpCCJyoCsYvFGzpkTSzMVd3.WxWNaE5cdT7AlQOoRAtbgQzYBibUitYW4McaAHAACvc",
-          "encryptedSecurityCode": "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJ2ZXJzaW9uIjoiMSJ9.UFa1Mct03sGX9RMgqZb8TRphEclRT3-9Ovu165097dWFZqiSC2U9e4eCt11M97zJJ1w2lfdb2TGv4cQ0zxRZfpI7zuwTsTbu-tOT382pdr1-Ua9W-PpTORbFEnR1MZB0F2c55NBDhzY7Buc5wxiY7_xrOvC4N6EhkMRuGrHywkJRJ7wKbxVvmGZHcJxmEb3wLrh3GLE3kRMIysLbBssC5LjzzrQFO8rezOVNMSoNBh13XbT_KXF3PSGlDNPiajSRbYzAp-eZ7tIQlfefnbrSzYv4zsmbeMV8ut9V1SKlbuZRIemAJFbterfP44vSmGSzM864KEPHBvinuK7-H3NN6w.GlcBMgJIV_6SglCQTrvLCA.5dhGUeVSBfhWIEI2tR5IrQ6I1oQWO3-3Xp8TxCfaWMT96n-a7sHfGxp-QaH0qQP-9ASjv9VKQifR9aWTAkZePwf2NBNWclvEoyd93oXNERw.9ewFWCGuHvaktZIQ7-2jVbb3tXLsIhWgmGnG8NUC7eA",
-          "encryptedExpiryMonth": "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJ2ZXJzaW9uIjoiMSJ9.keDk-gRx7PAmX7Djg_gskC-pkIZ3Au2xiN-dWic2kL3Sd2ALUfvCsyR4Z7E3JuZ0Nzs0oIcyjU3yhJaE1nD4Yz1NSsjPMZXvUhSffuJPfrvCIO_SU-a3cbZ7vAq2T08qr5jqLS-POJh8u0kx7uka_EgiHhntFN_ndu0Od4AuAxMtUJNY5U1reISsRp0y2HV5gpAE4ORlRGg1rLPQpzW6xKcTJNmCYoSdg7Fk58ON0X0CsfIfP7K8cG_bPlzN-7PjzfuJyhFWW2yP8DVMOfvueyz9u1oa2kpLFzJgwHYPtqgILwQyclKrKH4Qmzkgc-Wf0RPS5pdVAochIj5hWyGJVA.6nj5N50cUfBpWzjXHanIuA.jOxOXWuvuPwCIm66Nf0r-PT-WAI2P0EhGlc0E_Wm0UhPRODqyoGUx8jJbC8yXeD7-OtsP9zA6e8fqao3xXw5Eg.kAmvWi__EgstCakQw_HIdZfl9NoAbG5Kfwzue7NamgQ",
-          "encryptedExpiryYear": "eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZDQkMtSFM1MTIiLCJ2ZXJzaW9uIjoiMSJ9.m04tnx8fbnB7PljYymkblLaDPWmNDUv6fU-fLGz3NKAbjob3NEOcZfivhesFObcfiBFmCkOzWid6Fac-15FNWHGWsbwLka3Wm3KavVA8twDlc6Rm-qrbKuoP5VzAmLEhd5y-5KZZAiTm8sise0U-vDncgOGUSRGDA9FK5m2i-74fV0pbdSYUWDs_YmdeBXBciruvK2NYW8LTQLA716_yPfAg2xpz0cqvs4oEx-YUEOGZodWtKCjA9ZX_n4Y_n0Om7XNd9aGY0O3T3UYUVES_D3xSs3roNpU9gNlaqtIM80ZVe20x2LBBSG78esswJThoTdEAGZ20b3MnFIXlOmc2-g.jquRJBwWfh7n9z80g0L-hg.7uRIswj0q0t_TXnoWUu73F4880pw_Fc0YjOrWOWzBdDCtzarcGnTl4CPQW2kL57RS7uKjYHDZWVDUgE_PTJJFQ.5XOoDOaCQ4XOW0NApQEKziPqCc-oVpDeDTSdtwp0lzs"
-      },
+      paymentMethod: paymentMethod,
       // we strongly recommend that you the billingAddress in your request. 
       // card schemes require this for channel web, iOS, and Android implementations.
       // billingAddress:

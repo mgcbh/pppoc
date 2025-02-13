@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Card } from "@adyen/adyen-web";
 import "@adyen/adyen-web/styles/adyen.css";
-import { initiateCheckout } from "../../app/paymentSlice";
+import { clearPaymentSession, initiateCheckout } from "../../app/paymentSlice";
 import { getRedirectUrl } from "../../util/redirect";
 
 export const SingleCardContainer = () => {
@@ -22,12 +22,18 @@ const Checkout = () => {
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
   const cardRef = useRef(null);
+  const [includePaymentMethods, setIncludePaymentMethods] = useState(true);
 
+  const handleReset = () => {
+    cardRef.current.unmount();
+    cardRef.current = null;
+    dispatch(clearPaymentSession());
+    setIncludePaymentMethods(false);
+  }
 
   useEffect(() => {
     dispatch(initiateCheckout());
-  }, [dispatch])
-
+  }, [dispatch, includePaymentMethods])
 
   useEffect(() => {
     const { error } = payment;
@@ -36,7 +42,6 @@ const Checkout = () => {
       navigate(`/status/error?reason=${error}`, { replace: true });
     }
   }, [payment, navigate])
-
 
   useEffect(() => {
     const { config, paymentMethods } = payment;
@@ -50,7 +55,7 @@ const Checkout = () => {
     const createCheckout = async () => {
       const checkout = await AdyenCheckout({
         ...config,
-        paymentMethodsResponse: paymentMethods,
+        paymentMethodsResponse: includePaymentMethods ? paymentMethods : {},
         showPayButton: true,
         onSubmit: async (state, component, actions) => {
           console.info("onSubmit", state, component, actions);
@@ -63,12 +68,12 @@ const Checkout = () => {
                   "Content-Type": "application/json",
                 }
               }).then(response => response.json());
-    
+
               if (!resultCode) {
                 console.warn("reject");
                 actions.reject();
               }
-    
+
               actions.resolve({
                 resultCode,
                 action,
@@ -103,12 +108,12 @@ const Checkout = () => {
                 "Content-Type": "application/json",
               }
             }).then(response => response.json());
-    
+
             if (!resultCode) {
               console.warn("reject");
               actions.reject();
             }
-    
+
             actions.resolve({ resultCode });
           } catch (error) {
             console.error(error);
@@ -138,8 +143,9 @@ const Checkout = () => {
 
 
         if (cardRef.current === null) {
+          console.log('creating new card')
           cardRef.current = new Card(checkout, cardConfiguration);
-          
+
           // Mount the card component.
           cardRef.current.mount(paymentContainer.current);
         }
@@ -155,9 +161,13 @@ const Checkout = () => {
 
   return (
     <div>
-      <div className="payment-container">
+      <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment"></div>
       </div>
+      <button className="button button--small"
+        onClick={handleReset}>
+        Show what the component looks like when paymentMethodsResponse is omitted.
+      </button>
     </div>
   );
 }
