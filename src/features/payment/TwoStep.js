@@ -22,7 +22,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
   const cardRef = useRef(null);
-  const [cardRefData, setCardRefData] = useState({});
+  const cardRefData = useRef(null);
   const [message, setMessage] = useState('');
   const [json, setJson] = useState({});
 
@@ -34,7 +34,7 @@ const Checkout = () => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
       const cardData = { 
-        ...cardRefData
+        ...cardRefData.current
       };
       setMessage('The following will be saved to session storage and used in the final place order click:');
       setJson(cardData);
@@ -100,7 +100,7 @@ const Checkout = () => {
             holderName: 'J. Smith'
           },
           onChange: (state, component) => {
-            setCardRefData(state.data);
+            cardRefData.current = state.data
           }
         }
 

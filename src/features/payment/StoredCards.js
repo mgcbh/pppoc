@@ -26,8 +26,8 @@ const Checkout = () => {
   const storedCardRef = useRef(null);
   const [message, setMessage] = useState('');
   const [storedMessage, setStoredMessage] = useState('');
-  const [storedCardRefData, setStoredCardRefData] = useState({});
-  const [cardRefData, setCardRefData] = useState({});
+  const storedCardRefData = useRef(null);
+  const cardRefData = useRef(null);
   const [allStoredCards, setAllStoredCards] = useState([]);
   const [json, setJson] = useState({});
   const [storedJson, setStoredJson] = useState({});
@@ -40,7 +40,7 @@ const Checkout = () => {
     // Validate the shopper input in the payment form.
     if (storedCardRef.current.state.isValid) {
       const cardData = {
-        paymentMethod: storedCardRefData.paymentMethod,
+        ...storedCardRefData.current,
         shopperInteraction: 'ContAuth',
         recurringProcessingModel: 'CardOnFile',
         shopperReference: 'pocShopper'
@@ -63,7 +63,7 @@ const Checkout = () => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
       const cardData = {
-        ...cardRefData,
+        ...cardRefData.current,
         storePaymentMethod: true,
         recurringProcessingModel: 'CardOnFile',
         shopperReference: 'pocShopper'
@@ -137,7 +137,7 @@ const Checkout = () => {
 
         if (cardRef.current === null) {
           cardConfiguration.onChange = (state, component) => {
-            setCardRefData(state.data);
+            cardRefData.current = state.data;
           }
 
           cardRef.current = new Card(checkout, cardConfiguration);
@@ -150,7 +150,7 @@ const Checkout = () => {
           setStoredJson(storedPaymentMethod);
 
           storedPaymentMethod.onChange = (state, component) => {
-            setStoredCardRefData(state.data);
+            storedCardRefData.current = state.data;
           }
 
           storedCardRef.current = new Card(checkout, storedPaymentMethod)
