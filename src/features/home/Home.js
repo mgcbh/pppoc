@@ -48,7 +48,7 @@ export const Home = () => {
         <li className="integration-list-item">
           <Link to="/checkout/two-step" className="integration-list-item-link">
             <div className="title-container">
-              <p className="integration-list-item-title">Two Step Checkout</p>
+              <p className="integration-list-item-title">Two-Step Checkout</p>
             </div>
           </Link>
         </li>

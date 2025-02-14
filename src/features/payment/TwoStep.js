@@ -23,6 +23,7 @@ const Checkout = () => {
   const paymentContainer = useRef(null);
   const cardRef = useRef(null);
   const cardRefData = useRef(null);
+  const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState('');
   const [json, setJson] = useState({});
 
@@ -30,22 +31,23 @@ const Checkout = () => {
     navigate('/review');
   }
 
-  const handleGoToReview = () => {
+  const handleContinue = () => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
       const cardData = {
         ...cardRefData.current
       };
-      setMessage('The following will be saved to session storage and used in the final place order click:');
+      setMessage('The following will be saved to session storage and used in the final place order click. It could also be saved to the back end if necessary.');
       setJson(cardData);
 
       // Store the payment data to use in the /payments request.
       // Pass goToReview to navigate to review if the save is successful.
-      setTimeout(() => {
-        // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
-        sessionStorage.setItem('cardData', JSON.stringify(cardData));
-        goToReview();
-      }, 3000);
+      // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
+      sessionStorage.setItem('cardData', JSON.stringify(cardData));
+      setSubmitted(true);
+
+      // Go to the review page. Commenting out so that we can do it manually instead.
+      // goToReview();
     } else {
       // If the payment method details are invalid, trigger the validation to focus on the missing field.
       cardRef.current.showValidation();
@@ -94,15 +96,14 @@ const Checkout = () => {
           // Optional configuration.
           billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
           showBrandIcon: true, // when false not showing the brand logo 
-          hasHolderName: true, // show holder name
-          holderNameRequired: true, // make holder name mandatory
+          hasHolderName: false, // hide the  holder name
+          holderNameRequired: false, // holder name is not mandatory
           // configure placeholders
           placeholders: {
             cardNumber: '1234 5678 9012 3456',
             expiryDate: 'MM/YY',
             securityCodeThreeDigits: '123',
             securityCodeFourDigits: '1234',
-            holderName: 'J. Smith'
           },
           onChange: (state, component) => {
             cardRefData.current = state.data
@@ -128,15 +129,38 @@ const Checkout = () => {
   return (
     <>
       <div className="mw-100">
+        <div className="mb-3">
+        <h2>Two-Step Checkout</h2>
+          <p>
+            This page demonstrates a "two-step" checkout flow where payment details are entered on the first page, and then the payment is
+            actually finalized and submitted to Adyen on the second page.
+          </p>
+          <ul>
+            <li>Card holder name is not shown.</li>
+            <li>
+              Encrypted card data is captured during the Adyen Card onChange event.{" "}
+              <a href="https://docs.adyen.com/online-payments/build-your-integration/advanced-flow/?platform=Web&integration=Components&version=6.5.1#add">
+                Step 5 in the advanced checkout flow docs
+              </a>{" "}
+              explains that the data from the onChange event can be passed to the backend for processing the payment.
+            </li>
+            <li>On the click to continue, focus is set to invalid data fields if applicable.</li>
+          </ul>
+        </div>
         <div className="payment-container mb-3">
           <div ref={paymentContainer} className="payment"></div>
         </div>
+        {message && json &&
+          <div className="mb-5">
+            <Messages message={message} json={json} />
+          </div>
+        }
         <div>
-          <button className="button" onClick={handleGoToReview}>Continue to Review Page</button>
+          <button className="button" onClick={submitted ? goToReview : handleContinue}>
+            Continue to Review Page
+            {submitted && <span> (click again to proceed)</span>}
+          </button>
         </div>
-        {(message && json) && (
-          <Messages message={message} json={json} />
-        )}
       </div>
     </>
   );

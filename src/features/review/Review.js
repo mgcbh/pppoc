@@ -13,6 +13,7 @@ export const ReviewContainer = () => {
   const payment = useSelector(state => state.payment);
   const [message, setMessage] = useState('');
   const [json, setJson] = useState({});
+  const [submitted, setSubmitted] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
   const [resultJson, setResultJson] = useState({});
   const paymentContainer = useRef(null);
@@ -117,8 +118,9 @@ export const ReviewContainer = () => {
       body: cardData
     }).then(response => response.json());
 
-    setResultMessage('Response from place order:')
+    setResultMessage('Adyen payment response is below. You will be redirected shortly.')
     setResultJson(response);
+    setSubmitted(true);
 
     const { action, resultCode, pspReference } = response;
 
@@ -129,13 +131,11 @@ export const ReviewContainer = () => {
     if (action) {
       checkoutRef.current.createFromAction(action).mount(paymentContainer.current);
     } else {
-      // No further action is required.
-      // Look at the response and redirect the user based on the result code.
-      setMessage('You will be redirected shortly.');
-      setJson({});
+      // No further action is required other than to 
+      // look at the response and redirect the user based on the result code.
       setTimeout(() => {
         navigate(getRedirectUrl(resultCode), { replace: true });
-      }, 3000)
+      }, 5000)
     }
   }
 
@@ -143,19 +143,25 @@ export const ReviewContainer = () => {
     <div id="review-page">
       <div className="container">
         <div className="mw-100">
-          <h2>Review your purchase</h2>
+          <h2>Review Your Purchase</h2>
           <p>
             This demonstrates sending a request to the backend to submit the payment to Adyen.
             Encrypted card details are retrieved from sessionStorage and sent in the body of
             the POST request to the backend.
           </p>
           <p>(order details here)</p>
-          <button className="button" onClick={handlePlaceOrder}>
-            Place Order
-          </button>
+
+          {message && json && <Messages message={message} json={json} />}
+
+          {!submitted &&
+            <button className="button" onClick={handlePlaceOrder}>
+              Place Order
+            </button>
+          }
+
           <div ref={paymentContainer}></div>
         </div>
-        {message && json && <Messages message={message} json={json} />}
+
         {resultMessage && resultJson && <Messages message={resultMessage} json={resultJson} />}
       </div>
     </div>
