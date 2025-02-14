@@ -53,11 +53,6 @@ export const Home = () => {
           </Link>
         </li>
       </ul>
-      <div className="mt-5">
-        <Link to="/cancel" className="button text-light">
-          Cancel and Refund a payment
-        </Link>
-      </div>
     </div>
   )
 }

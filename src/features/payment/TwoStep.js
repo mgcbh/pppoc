@@ -33,7 +33,7 @@ const Checkout = () => {
   const handleGoToReview = () => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
-      const cardData = { 
+      const cardData = {
         ...cardRefData.current
       };
       setMessage('The following will be saved to session storage and used in the final place order click:');
@@ -55,7 +55,6 @@ const Checkout = () => {
   useEffect(() => {
     dispatch(initiateCheckout());
   }, [dispatch])
-
 
   useEffect(() => {
     const { error } = payment;
@@ -80,6 +79,12 @@ const Checkout = () => {
         ...config,
         paymentMethodsResponse: paymentMethods,
         showPayButton: false, // Hide the pay button for two-step checkout.
+
+        // Called when there is any kind of error with the component.
+        onError: (error, component) => {
+          console.log('in on error')
+          console.error(error.name, error.message, error.stack, component);
+        }
       })
 
       // The 'ignore' flag is used to avoid double re-rendering caused by React 18 StrictMode

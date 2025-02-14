@@ -9,9 +9,11 @@ const Messages = ({
   return (
     <div className="mw-100 mt-5 p-3 shadow">
       <div className="message">{message}</div>
-      <div className="json">
-        <pre>{formattedJson}</pre>
-      </div>
+      {formattedJson !== '{}' &&
+        <div className="json">
+          <pre>{formattedJson}</pre>
+        </div>
+      }
     </div>
   )
 }
