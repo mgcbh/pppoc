@@ -103,6 +103,7 @@ const Checkout = () => {
             // See https://docs.adyen.com/payment-methods/apple-pay/web-component/?tab=advanced-requirements_2#ap-events
             onClick: (resolve, reject) => {
               console.info('onClick called');
+              resolve();
             },
             onValidateMerchant: (event) => {
               console.info('onValidateMerchant called', event)
