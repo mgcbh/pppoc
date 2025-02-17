@@ -123,7 +123,8 @@ const Checkout = () => {
             // }
           }
 
-          applePayRef.current = new ApplePay(checkout, applePayConfiguration);
+          // applePayRef.current = new ApplePay(checkout, applePayConfiguration);
+          applePayRef.current = new ApplePay(checkout);
 
           applePayRef.current
             .isAvailable()
