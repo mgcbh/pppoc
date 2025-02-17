@@ -31,13 +31,21 @@ export const Home = () => {
             </div>
           </Link>
         </li>
+        {/* Hide gift cards for now. Nothing to see yet. */}
+        {/* <li className="integration-list-item">
+          <Link to="/checkout/gift-card" className="integration-list-item-link">
+            <div className="title-container">
+              <p className="integration-list-item-title">Gift Card</p>
+            </div>
+          </Link>
+        </li> */}
         <li className="integration-list-item">
           <Link to="/checkout/stored-cards" className="integration-list-item-link">
             <div className="title-container">
               <p className="integration-list-item-title">Stored Cards</p>
             </div>
           </Link>
-        </li>        
+        </li>
         <li className="integration-list-item">
           <Link to="/checkout/two-cards" className="integration-list-item-link">
             <div className="title-container">

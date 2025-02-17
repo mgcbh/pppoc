@@ -9,6 +9,7 @@ import { StatusContainer } from "./features/status/Status";
 import { ReviewContainer } from "./features/review/Review";
 import { StoredCardsContainer } from "./features/payment/StoredCards";
 import { ApplePayContainer } from "./features/payment/ApplePay";
+import { GiftCardContainer } from "./features/payment/GiftCard";
 import "./App.css";
 import { Home } from "./features/home/Home";
 
@@ -23,6 +24,7 @@ const App = () => (
       <Routes>
         <Route path="/checkout/single-card" element={<SingleCardContainer />} />
         <Route path="/checkout/single-card-apply" element={<SingleCardApplyContainer />} />
+        <Route path="/checkout/gift-card" element={<GiftCardContainer />} />
         <Route path="/checkout/two-cards" element={<TwoCardsContainer />} />
         <Route path="/checkout/two-step" element={<TwoStepContainer />} />
         <Route path="/checkout/stored-cards" element={<StoredCardsContainer />} />
