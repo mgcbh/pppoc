@@ -52,6 +52,13 @@ export const Home = () => {
             </div>
           </Link>
         </li>
+        <li className="integration-list-item">
+          <Link to="/checkout/apple-pay" className="integration-list-item-link">
+            <div className="title-container">
+              <p className="integration-list-item-title">Apple Pay</p>
+            </div>
+          </Link>
+        </li>
       </ul>
     </div>
   )

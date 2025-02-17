@@ -168,6 +168,7 @@ const Checkout = () => {
 
   return (
     <div className="mw-100">
+      <p className="red">WORK IN PROGRESS</p>
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment mb-3"></div>
         <p className="p-4">This card will be saved and associated with user <code>pocShopper</code>.</p>

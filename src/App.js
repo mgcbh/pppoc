@@ -8,6 +8,7 @@ import { TwoStepContainer } from "./features/payment/TwoStep";
 import { StatusContainer } from "./features/status/Status";
 import { ReviewContainer } from "./features/review/Review";
 import { StoredCardsContainer } from "./features/payment/StoredCards";
+import { ApplePayContainer } from "./features/payment/ApplePay";
 import "./App.css";
 import { Home } from "./features/home/Home";
 
@@ -25,6 +26,7 @@ const App = () => (
         <Route path="/checkout/two-cards" element={<TwoCardsContainer />} />
         <Route path="/checkout/two-step" element={<TwoStepContainer />} />
         <Route path="/checkout/stored-cards" element={<StoredCardsContainer />} />
+        <Route path="/checkout/apple-pay" element={<ApplePayContainer />} />
         <Route path="/status/:type" element={<StatusContainer />} />
         <Route path="/redirect" element={<RedirectContainer />} />
         <Route path="/review" element={<ReviewContainer />} />
