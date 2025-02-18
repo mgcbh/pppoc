@@ -129,13 +129,15 @@ export const ReviewContainer = () => {
     // See https://docs.adyen.com/online-payments/two-step-checkout/#implement-a-review-page
     // and https://docs.adyen.com/online-payments/build-your-integration/advanced-flow/?platform=Web&integration=Components&version=6.5.1#additional-action
     if (action) {
-      checkoutRef.current.createFromAction(action).mount(paymentContainer.current);
+      setTimeout(() => {
+        checkoutRef.current.createFromAction(action).mount(paymentContainer.current);
+      }, 5000);
     } else {
       // No further action is required other than to 
       // look at the response and redirect the user based on the result code.
       setTimeout(() => {
         navigate(getRedirectUrl(resultCode), { replace: true });
-      }, 5000)
+      }, 5000);
     }
   }
 

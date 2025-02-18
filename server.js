@@ -152,7 +152,7 @@ app.post("/api/payments", async (req, res) => {
         //  nativeThreeDS: "preferred"
         //}
       },
-      returnUrl: `${protocol}://${localhost}/handleShopperRedirect?orderRef=${orderRef}`, // required for 3ds2 redirect flow
+      returnUrl: `${protocol}://${localhost}/redirect?orderRef=${orderRef}`, // required for 3ds2 redirect flow
       paymentMethod : req.body.paymentMethod,
       // we strongly recommend that you the billingAddress in your request. 
       // card schemes require this for channel web, iOS, and Android implementations.
@@ -208,7 +208,7 @@ app.post("/api/placeorder", async (req, res) => {
         //  nativeThreeDS: "preferred"
         //}
       },
-      returnUrl: `${protocol}://${localhost}/handleShopperRedirect?orderRef=${orderRef}`, // required for 3ds2 redirect flow
+      returnUrl: `${protocol}://${localhost}/redirect?orderRef=${orderRef}`, // required for 3ds2 redirect flow
       paymentMethod: req.body.paymentMethod,
       storePaymentMethod: req.body.storePaymentMethod,
       recurringProcessingModel: req.body.recurringProcessingModel,
