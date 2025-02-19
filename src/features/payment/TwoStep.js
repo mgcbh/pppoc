@@ -41,12 +41,11 @@ const Checkout = () => {
       setJson(cardData);
 
       // Store the payment data to use in the /payments request.
-      // Pass goToReview to navigate to review if the save is successful.
       // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
       sessionStorage.setItem('cardData', JSON.stringify(cardData));
       setSubmitted(true);
 
-      // Go to the review page. Commenting out so that we can do it manually instead.
+      // Go to the review page. Commenting out so that we can do it manually instead for POC purposes.
       // goToReview();
     } else {
       // If the payment method details are invalid, trigger the validation to focus on the missing field.

@@ -24,20 +24,25 @@ const Checkout = () => {
   const storedCardContainer = useRef(null);
   const cardRef = useRef(null);
   const storedCardRef = useRef(null);
-  const [message, setMessage] = useState('');
-  const [storedMessage, setStoredMessage] = useState('');
   const storedCardRefData = useRef(null);
   const cardRefData = useRef(null);
   const [allStoredCards, setAllStoredCards] = useState([]);
-  const [json, setJson] = useState({});
+  const [submitted, setSubmitted] = useState(false);
+
+  // Messaging
+  const [cardMessage, setCardMessage] = useState('');
+  const [storedMessage, setStoredMessage] = useState('');
+  const [storedDataMessage, setStoredDataMessage] = useState('');
+  const [cardJson, setCardJson] = useState('');
   const [storedJson, setStoredJson] = useState({});
+  const [storedDataJson, setStoredDataJson] = useState({});
 
   const goToReview = () => {
     navigate('/review');
   }
 
-  const handleGoToReview = () => {
-    // Validate the shopper input in the payment form.
+  const handleGoToReviewStored = () => {
+    // Validate the shopper input in the stored card form.
     if (storedCardRef.current.state.isValid) {
       const cardData = {
         ...storedCardRefData.current,
@@ -45,21 +50,23 @@ const Checkout = () => {
         recurringProcessingModel: 'CardOnFile',
         shopperReference: 'pocShopper'
       }
-      setMessage('The following will be saved to session storage and used in the final place order click:');
-      setJson(cardData);
+      setStoredDataMessage('The following will be saved to session storage and used in the final place order click:');
+      setStoredDataJson(cardData);
+      setSubmitted(true);
 
       // Store the payment data to use in the /payments request.
-      // Pass goToReview to navigate to review if the save is successful.
-      setTimeout(() => {
-        // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
-        sessionStorage.setItem('cardData', JSON.stringify(cardData));
-        goToReview();
-      }, 3000);
+      // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
+      sessionStorage.setItem('cardData', JSON.stringify(cardData));
+
+      // Go to the review page. Commenting out so that we can do it manually instead for POC purposes.
+      // goToReview();
     } else {
       // If the payment method details are invalid, trigger the validation to focus on the missing field.
       storedCardRef.current.showValidation();
     }
+  }
 
+  const handleGoToReview = () => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
       const cardData = {
@@ -68,16 +75,16 @@ const Checkout = () => {
         recurringProcessingModel: 'CardOnFile',
         shopperReference: 'pocShopper'
       };
-      setMessage('The following data will be saved to the user`s stored cards and also used for processing the payment:');
-      setJson(cardData);
+      setCardMessage('The following data will be saved to the user`s stored cards and also used for processing the payment:');
+      setCardJson(cardData);
+      setSubmitted(true);
 
       // Store the payment data to use in the /payments request.
-      // Pass goToReview to navigate to review if the save is successful.
-      setTimeout(() => {
-        // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
-        sessionStorage.setItem('cardData', JSON.stringify(cardData));
-        goToReview();
-      }, 3000);
+      // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
+      sessionStorage.setItem('cardData', JSON.stringify(cardData));
+
+      // Go to the review page. Commenting out so that we can do it manually instead for POC purposes.
+      // goToReview();
     } else {
       // If the payment method details are invalid, trigger the validation to focus on the missing field.
       cardRef.current.showValidation();
@@ -122,7 +129,7 @@ const Checkout = () => {
         const cardConfiguration = {
           // Optional configuration.
           billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
-          showBrandIcon: true, // when false not showing the brand logo 
+          showBrandIcon: true, // when false not showing the brand logo
           hasHolderName: true, // show holder name
           holderNameRequired: true, // make holder name mandatory
           // configure placeholders
@@ -146,12 +153,19 @@ const Checkout = () => {
 
         if (storedCardRef.current === null) {
           const storedPaymentMethod = checkout.paymentMethodsResponse.storedPaymentMethods[0];
-          setStoredMessage('The following data is needed to initialized the stored card component:')
+          setStoredMessage(
+            `The following data is is returned from the call to /api/paymentMethods
+            and is needed to initialize the stored card component:`
+          );
           setStoredJson(storedPaymentMethod);
 
           storedPaymentMethod.onChange = (state, component) => {
             storedCardRefData.current = state.data;
           }
+
+          // Enable once we have configured our account to skip CVCs.
+          // At this time, the payment request fails without a CVC but any CVC passes the test.
+          // storedPaymentMethod.hideCVC = true;
 
           storedCardRef.current = new Card(checkout, storedPaymentMethod)
           storedCardRef.current.mount(storedCardContainer.current);
@@ -168,13 +182,27 @@ const Checkout = () => {
 
   return (
     <div className="mw-100">
-      <p className="red">WORK IN PROGRESS</p>
+      <h4>Example 1: Pay and Store a Card<br />(Generate a Token)</h4>
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment mb-3"></div>
-        <p className="p-4">This card will be saved and associated with user <code>pocShopper</code>.</p>
       </div>
 
-      <h5>All of pocShopper's cards:</h5>
+      {(cardMessage && cardJson) && (
+        <Messages message={cardMessage} json={cardJson} />
+      )}
+
+      <div>
+        <button className="button" onClick={submitted ? goToReview : handleGoToReview}>
+          Continue to Review Page - pay and store card
+          {submitted && <span><br />(click again to proceed)</span>}
+          </button>
+        <p className="p-4">The payment response will include a token and will be stored and associated with user <code>pocShopper</code>.</p>
+      </div>
+
+      <hr className="mt-3 mb-5" />
+
+      <h4 className="mb-3">Example 2: Pay With a Stored Card</h4>
+      <h5>All of pocShopper's Stored Cards:</h5>
       <div className="payment-container mb-5">
         <ul>
           {allStoredCards.map((card) => {
@@ -186,19 +214,27 @@ const Checkout = () => {
       </div>
 
       <h5>First Stored Card:</h5>
+
       {(storedMessage && storedJson) && (
         <Messages message={storedMessage} json={storedJson} />
       )}
+
+      <h5>Stored Card Component:</h5>
       <div className="payment-container mb-5">
+        <p className="pl-4 pr-3">Enter the CVC to pay with card ending in {allStoredCards[0]?.lastFour}</p>
         <div ref={storedCardContainer} className="payment"></div>
       </div>
 
-      <div>
-        <button className="button" onClick={handleGoToReview}>Continue to Review Page</button>
-      </div>
-      {(message && json) && (
-        <Messages message={message} json={json} />
+      {(storedDataMessage && storedDataJson) && (
+        <Messages message={storedDataMessage} json={storedDataJson} />
       )}
+
+      <div>
+        <button className="button" onClick={submitted ? goToReview : handleGoToReviewStored}>
+          Continue to Review Page - pay with stored card
+          {submitted && <span><br />(click again to proceed)</span>}
+        </button>
+      </div>
     </div>
   );
 }
