@@ -18,12 +18,17 @@ export const ReviewContainer = () => {
   const [resultJson, setResultJson] = useState({});
   const paymentContainer = useRef(null);
   const checkoutRef = useRef(null);
+  const resultCodeRef = useRef(null);
+
+  // Redirect the user after receiving a response from the back end.
+  const handleRedirect = () => {
+    navigate(getRedirectUrl(resultCodeRef.current), { replace: true });
+  }
 
   // Initialize the checkout flow.
   useEffect(() => {
     dispatch(initiateCheckout());
   }, [dispatch])
-
 
   // DEV ONLY
   useEffect(() => {
@@ -57,6 +62,7 @@ export const ReviewContainer = () => {
           //////////////////////////
 
           console.info("onAdditionalDetails", state, component);
+
           try {
             const { resultCode } = await fetch("/api/payments/details", {
               method: "POST",
@@ -118,11 +124,12 @@ export const ReviewContainer = () => {
       body: cardData
     }).then(response => response.json());
 
-    setResultMessage('Adyen payment response is below. You will be redirected shortly.')
+    setResultMessage('Adyen payment response is below.')
     setResultJson(response);
     setSubmitted(true);
 
     const { action, resultCode, pspReference } = response;
+    resultCodeRef.current = resultCode;
 
     // Some payment methods require follow up action, such as redirecting
     // to another site for further action. This kicks off that process.
@@ -133,11 +140,10 @@ export const ReviewContainer = () => {
         checkoutRef.current.createFromAction(action).mount(paymentContainer.current);
       }, 5000);
     } else {
-      // No further action is required other than to 
+      // No further action is required other than to
       // look at the response and redirect the user based on the result code.
-      setTimeout(() => {
-        navigate(getRedirectUrl(resultCode), { replace: true });
-      }, 5000);
+      // Commenting out so that we can do it manually instead for POC purposes.
+      // handleRedirect();
     }
   }
 
@@ -154,17 +160,15 @@ export const ReviewContainer = () => {
           <p>(order details here)</p>
 
           {message && json && <Messages message={message} json={json} />}
+          {resultMessage && resultJson && <Messages message={resultMessage} json={resultJson} />}
 
-          {!submitted &&
-            <button className="button" onClick={handlePlaceOrder}>
-              Place Order
-            </button>
-          }
+          <button className="button" onClick={submitted ? handleRedirect : handlePlaceOrder}>
+            {!submitted && (<>Place Order</>)}
+            {submitted && <>Order Placed<br />(click again to proceed)</>}
+          </button>
 
           <div ref={paymentContainer}></div>
         </div>
-
-        {resultMessage && resultJson && <Messages message={resultMessage} json={resultJson} />}
       </div>
     </div>
   );
