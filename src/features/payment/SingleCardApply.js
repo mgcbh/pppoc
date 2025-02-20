@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Card } from "@adyen/adyen-web";
@@ -30,34 +30,32 @@ const Checkout = () => {
   const [json, setJson] = useState({});
 
   // The default configuration for a Card component.
-  const cardConfiguration = useMemo(() => {
-    return {
-      // Optional configuration.
-      billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
-      showBrandIcon: true, // when false not showing the brand logo 
-      hasHolderName: true, // show holder name
-      holderNameRequired: true, // make holder name mandatory
-      // configure placeholders
-      placeholders: {
-        cardNumber: '1234 5678 9012 3456',
-        expiryDate: 'MM/YY',
-        securityCodeThreeDigits: '123',
-        securityCodeFourDigits: '1234',
-        holderName: 'J. Smith'
-      },
-      onChange: (state, component) => {
-        cardRefData.current = state.data
-      },
-      onBrand: (brandData) => {
-        cardDisplayData.current.brand = brandData.brand;
-      },
-      onFieldValid: (data) => {
-        if (data.encryptedFieldName === 'encryptedCardNumber') {
-          cardDisplayData.current.lastFour = data.endDigits;
-        }
+  const cardConfiguration = {
+    // Optional configuration.
+    billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
+    showBrandIcon: true, // when false not showing the brand logo
+    hasHolderName: true, // show holder name
+    holderNameRequired: true, // make holder name mandatory
+    // configure placeholders
+    placeholders: {
+      cardNumber: '1234 5678 9012 3456',
+      expiryDate: 'MM/YY',
+      securityCodeThreeDigits: '123',
+      securityCodeFourDigits: '1234',
+      holderName: 'J. Smith'
+    },
+    onChange: (state, component) => {
+      cardRefData.current = state.data
+    },
+    onBrand: (brandData) => {
+      cardDisplayData.current.brand = brandData.brand;
+    },
+    onFieldValid: (data) => {
+      if (data.encryptedFieldName === 'encryptedCardNumber') {
+        cardDisplayData.current.lastFour = data.endDigits;
       }
     }
-  }, []);
+  }
 
   // Handle when the user clicks to "Apply" a credit card.
   const handleApply = () => {

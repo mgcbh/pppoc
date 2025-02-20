@@ -60,7 +60,7 @@ app.post("/api/webhooks/notifications", async (req, res) => {
   // fetch first (and only) NotificationRequestItem
   const notificationRequestItem = notificationRequestItems[0].NotificationRequestItem;
   console.log(notificationRequestItem);
-  
+
   if (!validator.validateHMAC(notificationRequestItem, process.env.ADYEN_HMAC_KEY)) {
     // invalid hmac: webhook cannot be accepted
     res.status(401).send('Invalid HMAC signature');
@@ -91,7 +91,7 @@ app.post("/api/webhooks/notifications", async (req, res) => {
           payment.status = "Cancelled";
         }
       }
-    } 
+    }
     else {
       console.info("skipping non actionable webhook");
     }
@@ -99,7 +99,7 @@ app.post("/api/webhooks/notifications", async (req, res) => {
 
   // acknowledge event has been consumed
   res.status(202).send(); // Send a 202 response with an empty body
-  
+
 });
 
 // Get payment methods
@@ -135,10 +135,10 @@ app.post("/api/payments", async (req, res) => {
     // allows for gitpod support
     const localhost = req.get('host');
     // const isHttps = req.connection.encrypted;
-    const protocol = req.socket.encrypted? 'https' : 'http';    
+    const protocol = req.socket.encrypted? 'https' : 'http';
     // ideally the data passed here should be computed based on business logic
     const response = await checkout.PaymentsApi.payments({
-      amount: { currency, value: 10000 }, // value is 100€ in minor units
+      amount: { currency, value: req.body.amount ? req.body.amount :  1000 },
       reference: orderRef, // required
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       channel: "Web", // required
@@ -154,7 +154,7 @@ app.post("/api/payments", async (req, res) => {
       },
       returnUrl: `${protocol}://${localhost}/redirect?orderRef=${orderRef}`, // required for 3ds2 redirect flow
       paymentMethod : req.body.paymentMethod,
-      // we strongly recommend that you the billingAddress in your request. 
+      // we strongly recommend that you the billingAddress in your request.
       // card schemes require this for channel web, iOS, and Android implementations.
       billingAddress:
         typeof req.body.billingAddress === "undefined" || Object.keys(req.body.billingAddress).length === 0
@@ -191,10 +191,10 @@ app.post("/api/placeorder", async (req, res) => {
     // allows for gitpod support
     const localhost = req.get('host');
     // const isHttps = req.connection.encrypted;
-    const protocol = req.socket.encrypted? 'https' : 'http';    
+    const protocol = req.socket.encrypted? 'https' : 'http';
     // ideally the data passed here should be computed based on business logic
     const response = await checkout.PaymentsApi.payments({
-      amount: { currency, value: 10000 }, // value is 100€ in minor units
+      amount: { currency, value: req.body.amount ? req.body.amount :  1000 },
       reference: orderRef, // required
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       channel: "Web", // required
@@ -212,7 +212,7 @@ app.post("/api/placeorder", async (req, res) => {
       paymentMethod: req.body.paymentMethod,
       storePaymentMethod: req.body.storePaymentMethod,
       recurringProcessingModel: req.body.recurringProcessingModel,
-      // we strongly recommend that you the billingAddress in your request. 
+      // we strongly recommend that you the billingAddress in your request.
       // card schemes require this for channel web, iOS, and Android implementations.
       // billingAddress:
       //   typeof req.body.billingAddress === "undefined" || Object.keys(req.body.billingAddress).length === 0

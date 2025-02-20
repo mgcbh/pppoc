@@ -23,6 +23,7 @@ const Checkout = () => {
   const paymentContainer = useRef(null);
   const cardRef = useRef(null);
   const cardRefData = useRef(null);
+  const [bin, setBin] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState('');
   const [json, setJson] = useState({});
@@ -94,7 +95,7 @@ const Checkout = () => {
         const cardConfiguration = {
           // Optional configuration.
           billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
-          showBrandIcon: true, // when false not showing the brand logo 
+          showBrandIcon: true, // when false not showing the brand logo
           hasHolderName: false, // hide the  holder name
           holderNameRequired: false, // holder name is not mandatory
           // configure placeholders
@@ -106,6 +107,11 @@ const Checkout = () => {
           },
           onChange: (state, component) => {
             cardRefData.current = state.data
+          },
+          onBinValue: (data) => {
+            if (data?.binValue) {
+              setBin(data.binValue);
+            }
           }
         }
 
@@ -149,6 +155,7 @@ const Checkout = () => {
         <div className="payment-container mb-3">
           <div ref={paymentContainer} className="payment"></div>
         </div>
+        <p className="my-3"><b>BIN:</b> {bin}</p>
         {message && json &&
           <div className="mb-5">
             <Messages message={message} json={json} />

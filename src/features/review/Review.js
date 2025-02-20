@@ -20,6 +20,9 @@ export const ReviewContainer = () => {
   const checkoutRef = useRef(null);
   const resultCodeRef = useRef(null);
 
+  const cardData = sessionStorage.getItem('cardData');
+  const cardDataTwo = sessionStorage.getItem('cardDataTwo');
+
   // Redirect the user after receiving a response from the back end.
   const handleRedirect = () => {
     navigate(getRedirectUrl(resultCodeRef.current), { replace: true });
@@ -32,8 +35,11 @@ export const ReviewContainer = () => {
 
   // DEV ONLY
   useEffect(() => {
-    setMessage('The following will be submitted with the payment request:');
-    setJson(JSON.parse(sessionStorage.getItem('cardData')))
+    setMessage('The following card data will be submitted with the payment request:');
+    setJson({
+      cardOne: JSON.parse(cardData),
+      cardTwo: JSON.parse(cardDataTwo)
+    })
   }, [])
 
   // Once the paymentMethods have been set, create the checkout instance.
@@ -114,8 +120,6 @@ export const ReviewContainer = () => {
 
   // Handle a click on the Place Order button.
   const handlePlaceOrder = async () => {
-    const cardData = sessionStorage.getItem('cardData');
-
     const response = await fetch("/api/placeorder", {
       method: "POST",
       headers: {
@@ -127,6 +131,7 @@ export const ReviewContainer = () => {
     setResultMessage('Adyen payment response is below.')
     setResultJson(response);
     setSubmitted(true);
+    sessionStorage.removeItem('cardData');
 
     const { action, resultCode, pspReference } = response;
     resultCodeRef.current = resultCode;
@@ -147,6 +152,37 @@ export const ReviewContainer = () => {
     }
   }
 
+  // Handle a click on the Place Order button when there are two payment cards.
+  const handlePlaceOrderTwoCards = async () => {
+    const response = await fetch("/api/placeorder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: cardData
+    }).then(response => response.json());
+
+    const responseTwo = await fetch("/api/placeorder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: cardDataTwo
+    }).then(response => response.json());
+
+    setResultMessage('The placeorder endpoint was called twice. Adyen payment responses are below.')
+    setResultJson({
+      responseOne: response,
+      responseTwo: responseTwo
+    });
+    setSubmitted(true);
+    sessionStorage.removeItem('cardData');
+    sessionStorage.removeItem('cardDataTwo');
+
+    // Skip handling actions and redirecting to a result page in this case for POC.
+    // ...
+  }
+
   return (
     <div id="review-page">
       <div className="container">
@@ -162,11 +198,19 @@ export const ReviewContainer = () => {
           {message && json && <Messages message={message} json={json} />}
           {resultMessage && resultJson && <Messages message={resultMessage} json={resultJson} />}
 
-          <button className="button" onClick={submitted ? handleRedirect : handlePlaceOrder}>
-            {!submitted && (<>Place Order</>)}
-            {submitted && <>Order Placed<br />(click again to proceed)</>}
-          </button>
+          {!cardDataTwo &&
+            <button className="button" onClick={submitted ? handleRedirect : handlePlaceOrder}>
+              {!submitted && (<>Place Order</>)}
+              {submitted && <>Order Placed<br />(click again to proceed)</>}
+            </button>
+          }
 
+          {cardDataTwo &&
+            <button className="button" onClick={submitted ? null : handlePlaceOrderTwoCards}>
+              {!submitted && (<>Place Order for Two Cards</>)}
+              {submitted && <>Order Placed</>}
+            </button>
+          }
           <div ref={paymentContainer}></div>
         </div>
       </div>

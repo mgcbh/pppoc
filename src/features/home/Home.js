@@ -49,7 +49,7 @@ export const Home = () => {
         <li className="integration-list-item">
           <Link to="/checkout/two-cards" className="integration-list-item-link">
             <div className="title-container">
-              <p className="integration-list-item-title">Two Cards</p>
+              <p className="integration-list-item-title">Pay with Two Cards</p>
             </div>
           </Link>
         </li>
