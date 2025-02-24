@@ -239,6 +239,26 @@ app.post("/api/placeorder", async (req, res) => {
   }
 });
 
+// Check gift card balance
+app.post("/api/paymentMethods/balance", async (req, res) => {
+  try {
+    // unique ref for the transaction
+    const orderRef = uuid();
+
+    const response = await checkout.OrdersApi.getBalanceOfGiftCard({
+      amount: { currency: 'USD', value: 135 },
+      merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
+      paymentMethod : req.body.paymentMethod,
+      reference: orderRef, // required
+    });
+
+    res.json(response);
+  } catch (err) {
+    console.error(`Error: ${err.message}, error code: ${err.errorCode}`);
+    res.status(err.statusCode).json(err.message);
+  }
+});
+
 app.post("/api/payments/details", async (req, res) => {
   // Create the payload for submitting payment details
   const payload = {

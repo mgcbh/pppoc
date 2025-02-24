@@ -13,36 +13,11 @@ export const Home = () => {
 
   return (
     <div className="main-container">
-      <div className="info">
-        <h1>Select a demo</h1>
-      </div>
-      <ul className="integration-list">
+      <ul className="integration-list mb-5">
         <li className="integration-list-item">
-          <Link to="/checkout/single-card" className="integration-list-item-link">
+          <Link to="/checkout/two-step" className="integration-list-item-link">
             <div className="title-container">
-              <p className="integration-list-item-title">Single Card</p>
-            </div>
-          </Link>
-        </li>
-        <li className="integration-list-item">
-          <Link to="/checkout/single-card-apply" className="integration-list-item-link">
-            <div className="title-container">
-              <p className="integration-list-item-title">Apply a Single Card</p>
-            </div>
-          </Link>
-        </li>
-        {/* Hide gift cards for now. Nothing to see yet. */}
-        {/* <li className="integration-list-item">
-          <Link to="/checkout/gift-card" className="integration-list-item-link">
-            <div className="title-container">
-              <p className="integration-list-item-title">Gift Card</p>
-            </div>
-          </Link>
-        </li> */}
-        <li className="integration-list-item">
-          <Link to="/checkout/stored-cards" className="integration-list-item-link">
-            <div className="title-container">
-              <p className="integration-list-item-title">Stored Cards</p>
+              <p className="integration-list-item-title">Two-Step Checkout</p>
             </div>
           </Link>
         </li>
@@ -54,9 +29,16 @@ export const Home = () => {
           </Link>
         </li>
         <li className="integration-list-item">
-          <Link to="/checkout/two-step" className="integration-list-item-link">
+          <Link to="/checkout/stored-cards" className="integration-list-item-link">
             <div className="title-container">
-              <p className="integration-list-item-title">Two-Step Checkout</p>
+              <p className="integration-list-item-title">Stored Cards</p>
+            </div>
+          </Link>
+        </li>
+        <li className="integration-list-item">
+          <Link to="/checkout/gift-card" className="integration-list-item-link">
+            <div className="title-container">
+              <p className="integration-list-item-title">Gift Card</p>
             </div>
           </Link>
         </li>
@@ -65,6 +47,20 @@ export const Home = () => {
             <div className="title-container">
               <p className="integration-list-item-title">Apple Pay</p>
             </div>
+          </Link>
+        </li>
+      </ul>
+
+      <p>Other demos:</p>
+      <ul>
+        <li>
+          <Link to="/checkout/single-card">
+            Single Card
+          </Link>
+        </li>
+        <li>
+          <Link to="/checkout/single-card-apply">
+            Apply a Single Card
           </Link>
         </li>
       </ul>

@@ -1,10 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Giftcard } from "@adyen/adyen-web";
 import "@adyen/adyen-web/styles/adyen.css";
 import { initiateCheckout } from "../../app/paymentSlice";
-import { getRedirectUrl } from "../../util/redirect";
+import Messages from "../../components/Messages";
 
 export const GiftCardContainer = () => {
   return (
@@ -22,6 +22,10 @@ const Checkout = () => {
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
   const giftCardRef = useRef(null);
+  const [message, setMessage] = useState('');
+  const [json, setJson] = useState({});
+  const [messageResponse, setMessageResponse] = useState('');
+  const [jsonResponse, setJsonResponse] = useState({});
 
   useEffect(() => {
     dispatch(initiateCheckout());
@@ -49,44 +53,6 @@ const Checkout = () => {
         ...config,
         paymentMethodsResponse: paymentMethods,
         showPayButton: true,
-
-        // Is onSubmit needed for gift cards?
-        onSubmit: async (state, component, actions) => {
-          console.info("onSubmit", state, component, actions);
-          try {
-            if (state.isValid) {
-              const { action, order, resultCode } = await fetch("/api/payments", {
-                method: "POST",
-                body: state.data ? JSON.stringify(state.data) : "",
-                headers: {
-                  "Content-Type": "application/json",
-                }
-              }).then(response => response.json());
-
-              if (!resultCode) {
-                console.warn("reject");
-                actions.reject();
-              }
-
-              actions.resolve({
-                resultCode,
-                action,
-                order
-              });
-            }
-          } catch (error) {
-            console.error(error);
-            actions.reject();
-          }
-        },
-        onPaymentCompleted: (result, component) => {
-          console.info("onPaymentCompleted", result, component);
-          navigate(getRedirectUrl(result.resultCode), { replace: true });
-        },
-        onPaymentFailed: (result, component) => {
-          console.info("onPaymentFailed", result, component);
-          navigate(getRedirectUrl(result.resultCode), { replace: true });
-        },
         onError: (error, component) => {
           console.error("onError", error.name, error.message, error.stack, component);
           navigate(`/status/error?reason=${error.message}`, { replace: true });
@@ -97,14 +63,46 @@ const Checkout = () => {
       // More about it here: https://beta.reactjs.org/learn/synchronizing-with-effects#fetching-data
       if (paymentContainer.current && !ignore) {
         const giftCardConfiguration = {
+          onOrderCreated: function (orderStatus) {
+            // Get the remaining amount to be paid from orderStatus.
+            console.log(orderStatus.remainingAmount);
+            // Use your existing instance of AdyenCheckout to create payment methods components
+            // The shopper can use these payment methods to pay the remaining amount
+            // const idealComponent = checkout.create('ideal').mount('#ideal-container');
+            // const cardComponent = checkout.create('card').mount('#card-container');
+            // Add other payment method components that you want to show to the shopper
+          },
           onChange: (state, component) => {
             console.log('giftCard state:')
             console.log(state);
           },
-          onBalanceCheck: (resolve, reject, data) => {
+          onBalanceCheck: async (resolve, reject, data) => {
+            console.log(reject)
             console.log('onBalanceCheck: ', data)
-            // Make a POST /paymentMethods/balance request
-            // resolve(BalanceResponse);
+
+            try {
+              const balanceResponse = await fetch('/api/paymentMethods/balance', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+              }).then(response => response.json());
+
+              console.log('balance check response:');
+              console.log(balanceResponse);
+
+              setMessage('This data is used to check the gift card balance:')
+              setJson(data);
+
+              setMessageResponse('Response from the call to check the gift card balance (/paymentMethods/balance):')
+              setJsonResponse(balanceResponse);
+
+              // resolve(balanceResponse);
+            } catch (error) {
+              console.error(error);
+              alert("Error occurred. Look at console for details");
+            }
           },
           onOrderRequest: (resolve, reject, data) => {
             console.log('onOrderRequest: ', data)
@@ -120,7 +118,6 @@ const Checkout = () => {
           }
         };
 
-
         if (giftCardRef.current === null) {
           giftCardRef.current = new Giftcard(checkout, giftCardConfiguration);
 
@@ -128,7 +125,7 @@ const Checkout = () => {
           giftCardRef.current
             .isAvailable()
             .then(() => {
-              giftCardRef.mount(paymentContainer.current);
+              giftCardRef.current.mount(paymentContainer.current);
             })
             .catch(error => {
               console.log('Gift cards are not available.')
@@ -146,9 +143,21 @@ const Checkout = () => {
   }, [payment, navigate])
 
   return (
-    <div>
+    <div className="w-100">
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment"></div>
+      </div>
+
+      <div className="mb-3">
+        {(message && json) && (
+          <Messages message={message} json={json} />
+        )}
+      </div>
+
+      <div className="mb-3">
+        {(messageResponse && jsonResponse) && (
+          <Messages message={messageResponse} json={jsonResponse} />
+        )}
       </div>
     </div>
   );

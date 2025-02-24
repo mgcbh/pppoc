@@ -17,7 +17,7 @@ const App = () => (
   <>
     <header id="header">
       <Link to="/">
-        <img src="/images/mystore-logo.svg" alt="" />
+        Home
       </Link>
     </header>
     <div className="container">
