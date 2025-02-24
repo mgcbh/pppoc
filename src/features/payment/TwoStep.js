@@ -24,6 +24,7 @@ const Checkout = () => {
   const cardRef = useRef(null);
   const cardRefData = useRef(null);
   const [bin, setBin] = useState('');
+  const [fieldValidData, setFieldValidData] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [message, setMessage] = useState('');
   const [json, setJson] = useState({});
@@ -109,9 +110,10 @@ const Checkout = () => {
             cardRefData.current = state.data
           },
           onBinValue: (data) => {
-            if (data?.binValue) {
-              setBin(data.binValue);
-            }
+            setBin(data?.binValue);
+          },
+          onFieldValid: (data) => {
+            setFieldValidData(data);
           }
         }
 
@@ -135,7 +137,7 @@ const Checkout = () => {
     <>
       <div className="mw-100">
         <div className="mb-3">
-        <h2>Two-Step Checkout</h2>
+          <h2>Two-Step Checkout</h2>
           <p>
             This page demonstrates a "two-step" checkout flow where payment details are entered on the first page, and then the payment is
             actually finalized and submitted to Adyen on the second page.
@@ -155,7 +157,13 @@ const Checkout = () => {
         <div className="payment-container mb-3">
           <div ref={paymentContainer} className="payment"></div>
         </div>
-        <p className="my-3"><b>BIN:</b> {bin}</p>
+        <p className="my-3">
+          <em>BIN captured via onBinValue callback:</em><br />
+          <span className="pl-3">{bin}</span></p>
+        <p className="my-3">
+          <em>BIN captured via onFieldValid callback:</em><br />
+          <span className="pl-3">Card valid: {fieldValidData.valid?.toString()}</span><br />
+          <span className="pl-3">Bin value: {fieldValidData.issuerBin}</span></p>
         {message && json &&
           <div className="mb-5">
             <Messages message={message} json={json} />
