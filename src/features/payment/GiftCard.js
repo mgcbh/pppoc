@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Giftcard } from "@adyen/adyen-web";
@@ -26,6 +26,7 @@ const Checkout = () => {
   const [json, setJson] = useState({});
   const [messageResponse, setMessageResponse] = useState('');
   const [jsonResponse, setJsonResponse] = useState({});
+  const amountRef = useRef(null);
 
   useEffect(() => {
     dispatch(initiateCheckout());
@@ -77,8 +78,11 @@ const Checkout = () => {
             console.log(state);
           },
           onBalanceCheck: async (resolve, reject, data) => {
-            console.log(reject)
             console.log('onBalanceCheck: ', data)
+            const reqBody = {
+              ...data,
+              amount: parseInt(amountRef.current.value)
+            }
 
             try {
               const balanceResponse = await fetch('/api/paymentMethods/balance', {
@@ -86,14 +90,14 @@ const Checkout = () => {
                 headers: {
                   'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(reqBody)
               }).then(response => response.json());
 
               console.log('balance check response:');
               console.log(balanceResponse);
 
               setMessage('This data is used to check the gift card balance:')
-              setJson(data);
+              setJson(reqBody);
 
               setMessageResponse('Response from the call to check the gift card balance (/paymentMethods/balance):')
               setJsonResponse(balanceResponse);
@@ -144,6 +148,11 @@ const Checkout = () => {
 
   return (
     <div className="w-100">
+      <div className="form-group">
+        <label>Amount</label>
+        <input className="form-control" type="number" ref={amountRef} defaultValue={100} />
+      </div>
+
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment"></div>
       </div>
@@ -159,6 +168,61 @@ const Checkout = () => {
           <Messages message={messageResponse} json={jsonResponse} />
         )}
       </div>
+
+      <p>Adyen SVS test gift card number: 6006490000000000 (any PIN)</p>
+
+      <p>To simulate a scenario, send one of the following amounts in the test payment request:</p>
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Amount (last three digits)</th>
+            <th><code>resultCode</code></th>
+            <th><code>refusalReason</code></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>100</td>
+            <td>Authorised</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>123</td>
+            <td>Refused</td>
+            <td>Refused</td>
+          </tr>
+          <tr>
+            <td>124</td>
+            <td>Refused</td>
+            <td>Not enough balance</td>
+          </tr>
+          <tr>
+            <td>125</td>
+            <td>Refused</td>
+            <td>Blocked Card</td>
+          </tr>
+          <tr>
+            <td>126</td>
+            <td>Refused</td>
+            <td>Expired Card</td>
+          </tr>
+          <tr>
+            <td>130</td>
+            <td>Error</td>
+            <td>Acquirer Error</td>
+          </tr>
+          <tr>
+            <td>134</td>
+            <td>Refused</td>
+            <td>Invalid Pin</td>
+          </tr>
+          <tr>
+            <td>135</td>
+            <td>Refused</td>
+            <td>Pin tries exceeded</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

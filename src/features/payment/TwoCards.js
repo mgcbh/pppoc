@@ -229,9 +229,9 @@ const Checkout = () => {
               <div ref={paymentContainer} className="payment"></div>
             </div>
 
-            <div className="mb-3">
+            <div className="mb-3 form-group">
               <label>Amount:</label>
-              <input value={amount} type="number" onChange={(event) => setAmount(event.target.value)} />
+              <input value={amount} type="number" onChange={(event) => setAmount(event.target.value)} className="form-control" />
             </div>
 
             <div className="mb-5">
@@ -262,9 +262,9 @@ const Checkout = () => {
               <div ref={paymentContainerTwo} className="payment"></div>
             </div>
 
-            <div className="mb-3">
+            <div className="mb-3 form-group">
               <label>Amount:</label>
-              <input value={amountTwo} type="number" onChange={(event) => setAmountTwo(event.target.value)} />
+              <input value={amountTwo} type="number" onChange={(event) => setAmountTwo(event.target.value)} className="form-control" />
             </div>
 
             <div className="mb-5">

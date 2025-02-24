@@ -246,7 +246,7 @@ app.post("/api/paymentMethods/balance", async (req, res) => {
     const orderRef = uuid();
 
     const response = await checkout.OrdersApi.getBalanceOfGiftCard({
-      amount: { currency: 'USD', value: 135 },
+      amount: { currency: 'USD', value: req.body.amount ? req.body.amount :  1000 },
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       paymentMethod : req.body.paymentMethod,
       reference: orderRef, // required
