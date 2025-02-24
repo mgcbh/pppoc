@@ -113,7 +113,9 @@ const Checkout = () => {
             setBin(data?.binValue);
           },
           onFieldValid: (data) => {
-            setFieldValidData(data);
+            if (data.fieldType === 'encryptedCardNumber') {
+              setFieldValidData(data);
+            }
           }
         }
 
