@@ -22,6 +22,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
   const applePayRef = useRef(null);
+  const amountRef = useRef(null);
 
   const paymentContainerAlt = useRef(null);
   const applePayRefAlt = useRef(null);
@@ -63,7 +64,7 @@ const Checkout = () => {
                 method: "POST",
                 body: state.data ? JSON.stringify({
                   ...state.data,
-                  amount: 100
+                  amount: parseInt(amountRef.current.value)
                 }) : "",
                 headers: {
                   "Content-Type": "application/json",
@@ -197,7 +198,10 @@ const Checkout = () => {
   return (
     <div>
       <p className="red">WORK IN PROGRESS</p>
-      <p>Amount: 1.00</p>
+      <div className="form-group">
+        <label>Amount</label>
+        <input className="form-control" type="number" ref={amountRef} defaultValue={100} />
+      </div>
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment"></div>
         {errorMsg && (
