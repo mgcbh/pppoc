@@ -99,21 +99,26 @@ const Checkout = () => {
       if (paymentContainer.current && !ignore) {
         if (applePayRef.current === null) {
           const applePayConfiguration = {
+            amount: {
+              value: 100,
+              currency: "USD"
+            },
+            countryCode: "US"
             // Apple Pay component events.
             // See https://docs.adyen.com/payment-methods/apple-pay/web-component/?tab=advanced-requirements_2#ap-events
-            onClick: (resolve, reject) => {
-              console.info('onClick called');
-              resolve();
-            },
-            onValidateMerchant: (event) => {
-              console.info('onValidateMerchant called', event)
-            },
-            onPaymentAuthorized: (event) => {
-              console.info('onPaymentAuthorized called', event)
-            },
-            onPaymentMethodSelected: (event) => {
-              console.info('onPaymentMethodSelected called', event)
-            },
+            // onClick: (resolve, reject) => {
+            //   console.info('onClick called');
+            //   resolve();
+            // },
+            // onValidateMerchant: (event) => {
+            //   console.info('onValidateMerchant called', event)
+            // },
+            // onPaymentAuthorized: (event) => {
+            //   console.info('onPaymentAuthorized called', event)
+            // },
+            // onPaymentMethodSelected: (event) => {
+            //   console.info('onPaymentMethodSelected called', event)
+            // },
             // Methods below require isExpress = true.
             // onShippingContactSelected: (event) => {
             //   console.info('onShippingContactSelected called', event)
@@ -123,8 +128,8 @@ const Checkout = () => {
             // }
           }
 
-          // applePayRef.current = new ApplePay(checkout, applePayConfiguration);
-          applePayRef.current = new ApplePay(checkout);
+          applePayRef.current = new ApplePay(checkout, applePayConfiguration);
+          // applePayRef.current = new ApplePay(checkout);
 
           applePayRef.current
             .isAvailable()
