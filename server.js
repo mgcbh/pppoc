@@ -301,6 +301,8 @@ function findPayment(pspReference) {
 
 function findCurrency(type) {
   switch (type) {
+    case "applepay":
+      return "USD";
     case "ach":
       return "USD";
     case "wechatpayqr":
