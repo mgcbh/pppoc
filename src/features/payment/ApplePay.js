@@ -22,7 +22,12 @@ const Checkout = () => {
   const navigate = useNavigate();
   const paymentContainer = useRef(null);
   const applePayRef = useRef(null);
+
+  const paymentContainerAlt = useRef(null);
+  const applePayRefAlt = useRef(null);
+
   const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsgAlt, setErrorMsgAlt] = useState('');
 
   useEffect(() => {
     dispatch(initiateCheckout());
@@ -56,7 +61,10 @@ const Checkout = () => {
             if (state.isValid) {
               const { action, order, resultCode } = await fetch("/api/payments", {
                 method: "POST",
-                body: state.data ? JSON.stringify(state.data) : "",
+                body: state.data ? JSON.stringify({
+                  ...state.data,
+                  amount: 100
+                }) : "",
                 headers: {
                   "Content-Type": "application/json",
                 }
@@ -90,8 +98,16 @@ const Checkout = () => {
           console.error("onError", error.name, error.message, error.stack, component);
           navigate(`/status/error?reason=${error.message}`, { replace: true });
         },
+      })
 
-
+      const checkoutAlt = await AdyenCheckout({
+        ...config,
+        paymentMethodsResponse: paymentMethods,
+        showPayButton: true,
+        onError: (error, component) => {
+          console.error("onError", error.name, error.message, error.stack, component);
+          navigate(`/status/error?reason=${error.message}`, { replace: true });
+        },
       })
 
       // The 'ignore' flag is used to avoid double re-rendering caused by React 18 StrictMode
@@ -143,6 +159,32 @@ const Checkout = () => {
             });
         }
       }
+
+      if (paymentContainerAlt.current && !ignore) {
+        if (applePayRefAlt.current === null) {
+          const applePayConfiguration = {
+            amount: {
+              value: 100,
+              currency: "USD"
+            },
+            countryCode: "US"
+          }
+
+          applePayRefAlt.current = new ApplePay(checkoutAlt, applePayConfiguration);
+
+          applePayRefAlt.current
+            .isAvailable()
+            .then(() => {
+              // Mount the Apple Pay component.
+              applePayRefAlt.current.mount(paymentContainerAlt.current);
+            })
+            .catch(error => {
+              setErrorMsgAlt(error.toString());
+              console.log('Apple Pay is not available: ', error)
+            });
+        }
+      }
+
     }
 
     createCheckout();
@@ -155,12 +197,22 @@ const Checkout = () => {
   return (
     <div>
       <p className="red">WORK IN PROGRESS</p>
+      <p>Amount: 1.00</p>
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment"></div>
         {errorMsg && (
           <div className="p-4">
             <p>Apple Pay could not be enabled.</p>
             <p>Error message: {errorMsg}</p>
+          </div>
+        )}
+      </div>
+      <div className="payment-container mb-5">
+        <div ref={paymentContainerAlt} className="payment"></div>
+        {errorMsgAlt && (
+          <div className="p-4">
+            <p>Apple Pay could not be enabled.</p>
+            <p>Error message: {errorMsgAlt}</p>
           </div>
         )}
       </div>
