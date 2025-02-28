@@ -119,7 +119,9 @@ const Checkout = () => {
               value: 100,
               currency: "USD"
             },
-            countryCode: "US"
+            countryCode: "US",
+            shippingType: "shipping",
+            totalPriceLabel: "test price label"
             // Apple Pay component events.
             // See https://docs.adyen.com/payment-methods/apple-pay/web-component/?tab=advanced-requirements_2#ap-events
             // onClick: (resolve, reject) => {
