@@ -116,7 +116,7 @@ const Checkout = () => {
                 method: "POST",
                 body: state.data ? JSON.stringify({
                   ...state.data,
-                  amount: 0
+                  amount: 1
                 }) : "",
                 headers: {
                   "Content-Type": "application/json",
@@ -256,7 +256,7 @@ const Checkout = () => {
         if (applePayRefAlt.current === null) {
           const applePayConfiguration = {
             amount: {
-              value: 0,
+              value: 1,
               currency: "USD"
             },
             countryCode: "US"
