@@ -28,6 +28,7 @@ const Checkout = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [messageResponse, setMessageResponse] = useState('');
   const [jsonResponse, setJsonResponse] = useState({});
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     dispatch(initiateCheckout());
@@ -45,7 +46,7 @@ const Checkout = () => {
     const { config, paymentMethods } = payment;
     let ignore = false;
 
-    if (!paymentMethods || !paymentContainer.current) {
+    if (!paymentMethods || !paymentContainer.current || !initialized) {
       // initiateCheckout is not finished yet.
       return;
     }
@@ -160,7 +161,7 @@ const Checkout = () => {
     return () => {
       ignore = true;
     }
-  }, [payment, navigate])
+  }, [payment, navigate, initialized])
 
   return (
     <div>
@@ -178,15 +179,21 @@ const Checkout = () => {
 
       <p>The two amount above need to match in order for the payment to succeed. Note that "100" equals "$1.00".</p>
 
-      <div className="payment-container mb-5">
-        <div ref={paymentContainer} className="payment"></div>
-        {errorMsg && (
-          <div className="p-4">
-            <p>Apple Pay could not be enabled.</p>
-            <p>Error message: {errorMsg}</p>
-          </div>
-        )}
+      <div className="my-3">
+        <button onClick={() => setInitialized(true)} className="button">Click to initialize ApplePay after entering amounts.</button>
       </div>
+
+      {initialized &&
+        <div className="payment-container mb-5">
+          <div ref={paymentContainer} className="payment"></div>
+          {errorMsg && (
+            <div className="p-4">
+              <p>Apple Pay could not be enabled.</p>
+              <p>Error message: {errorMsg}</p>
+            </div>
+          )}
+        </div>
+      }
 
       <div className="mb-3">
         {(messageResponse && jsonResponse) && (
