@@ -20,14 +20,18 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const payment = useSelector(state => state.payment);
   const navigate = useNavigate();
-  const paymentContainer = useRef(null);
-  const applePayRef = useRef(null);
 
-  const paymentContainerAlt = useRef(null);
+  const applePayRef = useRef(null);
   const applePayRefAlt = useRef(null);
+  const applePayRefAlt2 = useRef(null);
+
+  const paymentContainer = useRef(null);
+  const paymentContainerAlt = useRef(null);
+  const paymentContainerAlt2 = useRef(null);
 
   const [errorMsg, setErrorMsg] = useState('');
   const [errorMsgAlt, setErrorMsgAlt] = useState('');
+  const [errorMsgAlt2, setErrorMsgAlt2] = useState('');
 
   useEffect(() => {
     dispatch(initiateCheckout());
@@ -63,7 +67,7 @@ const Checkout = () => {
                 method: "POST",
                 body: state.data ? JSON.stringify({
                   ...state.data,
-                  amount: 100
+                  amount: 10000
                 }) : "",
                 headers: {
                   "Content-Type": "application/json",
@@ -104,6 +108,94 @@ const Checkout = () => {
         ...config,
         paymentMethodsResponse: paymentMethods,
         showPayButton: true,
+        onSubmit: async (state, component, actions) => {
+          console.info("onSubmit", state, component, actions);
+          try {
+            if (state.isValid) {
+              const { action, order, resultCode } = await fetch("/api/payments", {
+                method: "POST",
+                body: state.data ? JSON.stringify({
+                  ...state.data,
+                  amount: 0
+                }) : "",
+                headers: {
+                  "Content-Type": "application/json",
+                }
+              }).then(response => response.json());
+
+              if (!resultCode) {
+                console.warn("reject");
+                actions.reject();
+              }
+
+              actions.resolve({
+                resultCode,
+                action,
+                order
+              });
+            }
+          } catch (error) {
+            console.error(error);
+            actions.reject();
+          }
+        },
+        onPaymentCompleted: (result, component) => {
+          console.info("onPaymentCompleted", result, component);
+          navigate(getRedirectUrl(result.resultCode), { replace: true });
+        },
+        onPaymentFailed: (result, component) => {
+          console.info("onPaymentFailed", result, component);
+          navigate(getRedirectUrl(result.resultCode), { replace: true });
+        },
+        onError: (error, component) => {
+          console.error("onError", error.name, error.message, error.stack, component);
+          navigate(`/status/error?reason=${error.message}`, { replace: true });
+        },
+      })
+
+      const checkoutAlt2 = await AdyenCheckout({
+        ...config,
+        paymentMethodsResponse: paymentMethods,
+        showPayButton: true,
+        onSubmit: async (state, component, actions) => {
+          console.info("onSubmit", state, component, actions);
+          try {
+            if (state.isValid) {
+              const { action, order, resultCode } = await fetch("/api/payments", {
+                method: "POST",
+                body: state.data ? JSON.stringify({
+                  ...state.data,
+                  amount: 0
+                }) : "",
+                headers: {
+                  "Content-Type": "application/json",
+                }
+              }).then(response => response.json());
+
+              if (!resultCode) {
+                console.warn("reject");
+                actions.reject();
+              }
+
+              actions.resolve({
+                resultCode,
+                action,
+                order
+              });
+            }
+          } catch (error) {
+            console.error(error);
+            actions.reject();
+          }
+        },
+        onPaymentCompleted: (result, component) => {
+          console.info("onPaymentCompleted", result, component);
+          navigate(getRedirectUrl(result.resultCode), { replace: true });
+        },
+        onPaymentFailed: (result, component) => {
+          console.info("onPaymentFailed", result, component);
+          navigate(getRedirectUrl(result.resultCode), { replace: true });
+        },
         onError: (error, component) => {
           console.error("onError", error.name, error.message, error.stack, component);
           navigate(`/status/error?reason=${error.message}`, { replace: true });
@@ -116,12 +208,10 @@ const Checkout = () => {
         if (applePayRef.current === null) {
           const applePayConfiguration = {
             amount: {
-              value: 100,
+              value: 10000,
               currency: "USD"
             },
             countryCode: "US",
-            shippingType: "shipping",
-            totalPriceLabel: "test price label"
             // Apple Pay component events.
             // See https://docs.adyen.com/payment-methods/apple-pay/web-component/?tab=advanced-requirements_2#ap-events
             // onClick: (resolve, reject) => {
@@ -166,7 +256,7 @@ const Checkout = () => {
         if (applePayRefAlt.current === null) {
           const applePayConfiguration = {
             amount: {
-              value: 100,
+              value: 0,
               currency: "USD"
             },
             countryCode: "US"
@@ -187,6 +277,30 @@ const Checkout = () => {
         }
       }
 
+      if (paymentContainerAlt2.current && !ignore) {
+        if (applePayRefAlt2.current === null) {
+          const applePayConfiguration = {
+            amount: {
+              value: 10000,
+              currency: "USD"
+            },
+            countryCode: "US"
+          }
+
+          applePayRefAlt2.current = new ApplePay(checkoutAlt2, applePayConfiguration);
+
+          applePayRefAlt2.current
+            .isAvailable()
+            .then(() => {
+              // Mount the Apple Pay component.
+              applePayRefAlt2.current.mount(paymentContainerAlt2.current);
+            })
+            .catch(error => {
+              setErrorMsgAlt2(error.toString());
+              console.log('Apple Pay is not available: ', error)
+            });
+        }
+      }
     }
 
     createCheckout();
@@ -199,7 +313,7 @@ const Checkout = () => {
   return (
     <div>
       <p className="red">WORK IN PROGRESS</p>
-      <p>Amount: 100</p>
+      <p>Amount: $100.00</p>
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment"></div>
         {errorMsg && (
@@ -209,13 +323,23 @@ const Checkout = () => {
           </div>
         )}
       </div>
-      <p>Minimal configuration:</p>
+      <p>Zero dollar amount:</p>
       <div className="payment-container mb-5">
         <div ref={paymentContainerAlt} className="payment"></div>
         {errorMsgAlt && (
           <div className="p-4">
             <p>Apple Pay could not be enabled.</p>
             <p>Error message: {errorMsgAlt}</p>
+          </div>
+        )}
+      </div>
+      <p>$100 displayed but with $0 in the /payments call:</p>
+      <div className="payment-container mb-5">
+        <div ref={paymentContainerAlt2} className="payment"></div>
+        {errorMsgAlt2 && (
+          <div className="p-4">
+            <p>Apple Pay could not be enabled.</p>
+            <p>Error message: {errorMsgAlt2}</p>
           </div>
         )}
       </div>
