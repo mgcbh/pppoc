@@ -208,7 +208,7 @@ const Checkout = () => {
       </div>
 
       <div className="form-group">
-        <label>Set the intent:</label>
+        <label>Set the <a href="https://docs.adyen.com/payment-methods/paypal/web-component/?tab=pp-risk-payments_2#intent" target="_blank">intent</a>:</label>
         <select disabled={initialized} className="form-control" onChange={(event) => setIntent(event.target.value)}>
           <option value="capture">capture</option>
           <option value="authorize">authorize</option>
@@ -217,9 +217,11 @@ const Checkout = () => {
         </select>
       </div>
 
+      <p>Note that if the amount is set to zero, or the intent is set to "tokenize" (regardless of the amount), Venmo and PayPal Later are not shown as payment options.</p>
+
       {ready && !initialized &&
         <div className="my-3">
-          <button onClick={createComponent} className="button">Initialize component</button>
+          <button onClick={createComponent} className="button">Initialize PayPal Component</button>
         </div>
       }
 
@@ -248,7 +250,7 @@ const Checkout = () => {
 
       {initialized &&
         <div className="my-3">
-          <button onClick={resetComponent} className="button">Reset component</button>
+          <button onClick={resetComponent} className="button">Reset PayPal Component</button>
         </div>
       }
     </div>

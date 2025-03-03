@@ -169,7 +169,7 @@ const Checkout = () => {
         )}
       </div>
 
-      <p>Adyen SVS test gift card number: 6006490000000000 (any PIN)</p>
+      {/* <p>Adyen SVS test gift card number: 6006490000000000 (any PIN)</p>
 
       <p>To simulate a scenario, send one of the following amounts in the test payment request:</p>
       <table className="table">
@@ -222,7 +222,7 @@ const Checkout = () => {
             <td>Pin tries exceeded</td>
           </tr>
         </tbody>
-      </table>
+      </table> */}
     </div>
   );
 }
