@@ -49,6 +49,13 @@ export const Home = () => {
             </div>
           </Link>
         </li>
+        <li className="integration-list-item">
+          <Link to="/checkout/paypal" className="integration-list-item-link">
+            <div className="title-container">
+              <p className="integration-list-item-title">PayPal</p>
+            </div>
+          </Link>
+        </li>        
       </ul>
 
       <p>Other demos:</p>

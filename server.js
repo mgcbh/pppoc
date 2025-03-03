@@ -128,6 +128,7 @@ app.post("/api/payments", async (req, res) => {
   const currency = findCurrency(req.body.paymentMethod.type);
   // find shopper IP from request
   const shopperIP = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+  console.log('amount: ', getAmount(req.body.amount))
 
   try {
     // unique ref for the transaction
@@ -138,7 +139,7 @@ app.post("/api/payments", async (req, res) => {
     const protocol = req.socket.encrypted? 'https' : 'http';
     // ideally the data passed here should be computed based on business logic
     const response = await checkout.PaymentsApi.payments({
-      amount: { currency, value: req.body.amount ? req.body.amount :  1000 },
+      amount: { currency, value: getAmount(req.body.amount) },
       reference: orderRef, // required
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       channel: "Web", // required
@@ -194,7 +195,7 @@ app.post("/api/placeorder", async (req, res) => {
     const protocol = req.socket.encrypted? 'https' : 'http';
     // ideally the data passed here should be computed based on business logic
     const response = await checkout.PaymentsApi.payments({
-      amount: { currency, value: req.body.amount ? req.body.amount :  1000 },
+      amount: { currency, value: getAmount(req.body.amount) },
       reference: orderRef, // required
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       channel: "Web", // required
@@ -246,7 +247,7 @@ app.post("/api/paymentMethods/balance", async (req, res) => {
     const orderRef = uuid();
 
     const response = await checkout.OrdersApi.getBalanceOfGiftCard({
-      amount: { currency: 'USD', value: req.body.amount ? req.body.amount :  1000 },
+      amount: { currency: 'USD', value: getAmount(req.body.amount) },
       merchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT, // required
       paymentMethod : req.body.paymentMethod,
       reference: orderRef, // required
@@ -299,9 +300,22 @@ function findPayment(pspReference) {
   return payments[0];
 }
 
+function getAmount(value) {
+  if (value === 0) {
+    return 0;
+  }
+
+  if (value) {
+    return value
+  }
+
+  return 1000;
+}
+
 function findCurrency(type) {
   switch (type) {
     case "applepay":
+    case "paypal":
       return "USD";
     case "ach":
       return "USD";
@@ -314,7 +328,7 @@ function findCurrency(type) {
     case "boletobancario_santander":
       return "BRL";
     default:
-      return "EUR";
+      return "USD";
   }
 }
 
