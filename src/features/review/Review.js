@@ -193,7 +193,6 @@ export const ReviewContainer = () => {
             Encrypted card details are retrieved from sessionStorage and sent in the body of
             the POST request to the backend.
           </p>
-          <p>(order details here)</p>
 
           {message && json && <Messages message={message} json={json} />}
           {resultMessage && resultJson && <Messages message={resultMessage} json={resultJson} />}

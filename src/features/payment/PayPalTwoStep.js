@@ -6,7 +6,7 @@ import "@adyen/adyen-web/styles/adyen.css";
 import { initiateCheckout } from "../../app/paymentSlice";
 import Messages from "../../components/Messages";
 
-export const PayPalContainer = () => {
+export const PayPalTwoStepContainer = () => {
   return (
     <div id="payment-page">
       <div className="container">
@@ -14,29 +14,29 @@ export const PayPalContainer = () => {
       </div>
     </div>
   );
-}
+};
 
 const Checkout = () => {
   const dispatch = useDispatch();
-  const payment = useSelector(state => state.payment);
+  const payment = useSelector((state) => state.payment);
   const navigate = useNavigate();
   const amountRef = useRef(null);
   const checkout = useRef(null);
   const payPalRef = useRef(null);
   const paymentContainer = useRef(null);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [submitmessage, setSubmitMessage] = useState('');
+  const [errorMsg, setErrorMsg] = useState("");
+  const [submitmessage, setSubmitMessage] = useState("");
   const [submitJson, setSubmitJson] = useState({});
-  const [detailsMessage, setDetailsMessage] = useState('');
+  const [detailsMessage, setDetailsMessage] = useState("");
   const [detailsJson, setDetailsJson] = useState({});
   const [initialized, setInitialized] = useState(false);
   const [ready, setReady] = useState(false);
-  const [intent, setIntent] = useState('capture');
   const [complete, setComplete] = useState(false);
+  const [capturedData, setCapturedData] = useState(false);
 
   useEffect(() => {
     dispatch(initiateCheckout());
-  }, [dispatch])
+  }, [dispatch]);
 
   useEffect(() => {
     const { error } = payment;
@@ -44,7 +44,7 @@ const Checkout = () => {
     if (error) {
       navigate(`/status/error?reason=${error}`, { replace: true });
     }
-  }, [payment, navigate])
+  }, [payment, navigate]);
 
   useEffect(() => {
     const { config, paymentMethods } = payment;
@@ -63,23 +63,31 @@ const Checkout = () => {
         ...config,
         paymentMethodsResponse: paymentMethods,
         showPayButton: true,
+
+        // This handler is required for PayPal and is called after the user has
+        // clicked the PayPal button.
         onSubmit: async (state, component, actions) => {
+          console.log("in onSubmit");
           try {
             if (state.isValid) {
               const response = await fetch("/api/payments", {
                 method: "POST",
-                body: state.data ? JSON.stringify({
-                  ...state.data,
-                  amount: parseInt(amountRef.current.value)
-                }) : "",
+                body: state.data
+                  ? JSON.stringify({
+                      ...state.data,
+                      amount: parseInt(amountRef.current.value),
+                    })
+                  : "",
                 headers: {
                   "Content-Type": "application/json",
-                }
-              }).then(response => response.json());
+                },
+              }).then((response) => response.json());
 
               const { action, order, resultCode } = response;
 
-              setSubmitMessage('Response from the call to the /payments API:')
+              setSubmitMessage(
+                "Response from the call to the /payments API, which is called when the user first clicks the PayPal button:"
+              );
               setSubmitJson(response);
 
               if (!resultCode) {
@@ -87,10 +95,13 @@ const Checkout = () => {
                 actions.reject();
               }
 
+              // This needs to be called in order to update the state of the
+              // PayPal modal. If the .resolve method is not called, the PayPal
+              // modal will just keep spinning.
               actions.resolve({
                 resultCode,
                 action,
-                order
+                order,
               });
             }
           } catch (error) {
@@ -98,48 +109,24 @@ const Checkout = () => {
             actions.reject();
           }
         },
+
+        // This handler is required for PayPal and is called after the user has
+        // completed their purchase and dismissed the PayPal modal.
         onAdditionalDetails: async (state, component, actions) => {
-          try {
-            // Make a POST /payments/details request from your server.
-            const response = await fetch("/api/payments/details", {
-              method: "POST",
-              body: state.data ? JSON.stringify({
-                ...state.data,
-              }) : "",
-              headers: {
-                "Content-Type": "application/json",
-              }
-            }).then(response => response.json());
+          console.log("in onAdditionalDetails");
 
-            setDetailsMessage('Response from the call to the /payments/details API:')
-            setDetailsJson(response);
+          // Store the payment data to use in the /payments/details request.
+          sessionStorage.setItem("payPalData", JSON.stringify(state.data));
 
-            // If the /payments/details request from your server fails, or if an unexpected error occurs.
-            if (!response.resultCode) {
-              actions.reject();
-              return;
-            }
-
-            const {
-              resultCode,
-              action,
-              order,
-              donationToken
-            } = response;
-
-            // If the /payments/details request request form your server is successful, you must call this to resolve whichever of the listed objects are available.
-            // You must call this, even if the result of the payment is unsuccessful.
-            actions.resolve({
-              resultCode,
-              action,
-              order,
-              donationToken,
-            });
-          } catch (error) {
-            console.error("onAdditionalDetails", error);
-            actions.reject();
-          }
+          setCapturedData(true);
+          setDetailsMessage(
+            `Upon clicking 'Complete Purchase' in the PayPal modal, the following 
+             data is saved to storage and will be used to finalize the payment on 
+             the review page:`
+          );
+          setDetailsJson(state.data);
         },
+
         onPaymentCompleted: (result, component) => {
           console.info("onPaymentCompleted", result, component);
           component.unmount();
@@ -155,76 +142,75 @@ const Checkout = () => {
           setErrorMsg(error.message);
           // navigate(`/status/error?reason=${error.message}`, { replace: true });
         },
-      })
+      });
 
       setReady(true);
-    }
+    };
 
     createCheckout();
 
     return () => {
       ignore = true;
-    }
-  }, [payment, navigate, setReady])
+    };
+  }, [payment, navigate, setReady]);
 
   const createComponent = () => {
     if (paymentContainer.current && checkout.current) {
       if (payPalRef.current === null) {
         const payPalConfiguration = {
-          intent: intent,
-          environment: 'test',
+          environment: "test",
           countryCode: "US",
           amount: {
             value: parseInt(amountRef.current.value),
-            currency: "USD"
+            currency: "USD",
           },
-        }
+        };
 
         payPalRef.current = new PayPal(checkout.current, payPalConfiguration);
         payPalRef.current.mount(paymentContainer.current);
         setInitialized(true);
       }
     }
-  }
+  };
 
   const resetComponent = () => {
     payPalRef.current.unmount();
     payPalRef.current = null;
     setInitialized(false);
     setSubmitJson({});
-    setSubmitMessage('');
+    setSubmitMessage("");
     setDetailsJson({});
-    setDetailsMessage('');
+    setDetailsMessage("");
     setComplete(false);
-    setErrorMsg('');
-  }
+    setErrorMsg("");
+    setCapturedData(false);
+    sessionStorage.removeItem("payPalData");
+  };
 
   return (
     <div className="mw-100">
+      <div className="mb-3">
+        <h2>PayPal Two-Step Checkout</h2>
+        <p>
+          This page demonstrates a "two-step" PayPal checkout flow where the user signs into their PayPal account on the first page, and
+          then the payment is actually finalized and submitted to Adyen on the second page.
+        </p>
+      </div>
+
       <div className="form-group">
         <label>Amount:</label>
         <input disabled={initialized} className="form-control" type="number" ref={amountRef} defaultValue={100} />
       </div>
 
-      <div className="form-group">
-        <label>Set the <a href="https://docs.adyen.com/payment-methods/paypal/web-component/?tab=pp-risk-payments_2#intent" target="_blank">intent</a>:</label>
-        <select disabled={initialized} className="form-control" onChange={(event) => setIntent(event.target.value)}>
-          <option value="capture">capture</option>
-          <option value="authorize">authorize</option>
-          <option value="subscription">subscription</option>
-          <option value="tokenize">tokenize</option>
-        </select>
-      </div>
-
-      <p>Note that if the amount is set to zero, or the intent is set to "tokenize" (regardless of the amount), Venmo and PayPal Later are not shown as payment options.</p>
-
-      {ready && !initialized &&
+      {ready && !initialized && (
         <div className="my-3">
-          <button onClick={createComponent} className="button">Initialize PayPal Component</button>
+          <button onClick={createComponent} className="button">
+            Initialize PayPal Component
+          </button>
         </div>
-      }
+      )}
 
-      <div className={`${initialized ? 'payment-container mb-5' : 'test'}`}>
+      <div className={`${initialized ? "payment-container mb-5" : "test"}`}>
         <div ref={paymentContainer} className="payment" />
         {complete && <p className="px-3 my-0">Processing complete.</p>}
         {errorMsg && (
@@ -235,23 +221,38 @@ const Checkout = () => {
         )}
       </div>
 
-      {(submitmessage && submitJson) && (
+      {submitmessage && submitJson && (
         <div className="mb-3">
           <Messages message={submitmessage} json={submitJson} />
         </div>
       )}
 
-      {(detailsMessage && detailsJson) && (
+      {detailsMessage && detailsJson && (
         <div className="mb-3">
           <Messages message={detailsMessage} json={detailsJson} />
         </div>
       )}
 
-      {initialized &&
+      {capturedData && !complete && (
         <div className="my-3">
-          <button onClick={resetComponent} className="button">Reset PayPal Component</button>
+          <button
+            onClick={() => {
+              navigate("/review-paypal");
+            }}
+            className="button"
+          >
+            Proceed to Review
+          </button>
         </div>
-      }
+      )}
+
+      {initialized && (
+        <div className="my-3">
+          <button onClick={resetComponent} className="button">
+            Reset PayPal Component
+          </button>
+        </div>
+      )}
     </div>
   );
-}
+};

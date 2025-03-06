@@ -165,7 +165,7 @@ const Checkout = () => {
 
           // Enable once we have configured our account to skip CVCs.
           // At this time, the payment request fails without a CVC but any CVC passes the test.
-          // storedPaymentMethod.hideCVC = true;
+          storedPaymentMethod.hideCVC = true;
 
           storedCardRef.current = new Card(checkout, storedPaymentMethod)
           storedCardRef.current.mount(storedCardContainer.current);

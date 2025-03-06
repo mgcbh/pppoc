@@ -7,9 +7,11 @@ import { TwoCardsContainer } from "./features/payment/TwoCards";
 import { TwoStepContainer } from "./features/payment/TwoStep";
 import { StatusContainer } from "./features/status/Status";
 import { ReviewContainer } from "./features/review/Review";
+import { ReviewPayPalContainer } from "./features/review/ReviewPayPal";
 import { StoredCardsContainer } from "./features/payment/StoredCards";
 import { ApplePayContainer } from "./features/payment/ApplePay";
 import { PayPalContainer } from "./features/payment/PayPal";
+import { PayPalTwoStepContainer } from "./features/payment/PayPalTwoStep";
 import { GiftCardContainer } from "./features/payment/GiftCard";
 import "./App.css";
 import { Home } from "./features/home/Home";
@@ -31,9 +33,11 @@ const App = () => (
         <Route path="/checkout/stored-cards" element={<StoredCardsContainer />} />
         <Route path="/checkout/apple-pay" element={<ApplePayContainer />} />
         <Route path="/checkout/paypal" element={<PayPalContainer />} />
+        <Route path="/checkout/paypal-two-step" element={<PayPalTwoStepContainer />} />
         <Route path="/status/:type" element={<StatusContainer />} />
         <Route path="/redirect" element={<RedirectContainer />} />
         <Route path="/review" element={<ReviewContainer />} />
+        <Route path="/review-paypal" element={<ReviewPayPalContainer />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </div>
