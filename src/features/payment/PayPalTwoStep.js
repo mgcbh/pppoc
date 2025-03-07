@@ -164,6 +164,7 @@ const Checkout = () => {
             value: parseInt(amountRef.current.value),
             currency: "USD",
           },
+          userAction: 'continue'
         };
 
         payPalRef.current = new PayPal(checkout.current, payPalConfiguration);
