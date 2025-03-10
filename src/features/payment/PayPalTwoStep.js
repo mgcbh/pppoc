@@ -74,39 +74,35 @@ const Checkout = () => {
                 method: "POST",
                 body: state.data
                   ? JSON.stringify({
-                      ...state.data,
-                      amount: parseInt(amountRef.current.value),
-                    })
+                    ...state.data,
+                    amount: parseInt(amountRef.current.value),
+                  })
                   : "",
                 headers: {
                   "Content-Type": "application/json",
                 },
               }).then((response) => response.json());
 
-              const { action, order, resultCode } = response;
+              const { resultCode } = response;
 
               setSubmitMessage(
                 "Response from the call to the /payments API, which is called when the user first clicks the PayPal button:"
               );
               setSubmitJson(response);
 
-              if (!resultCode) {
-                console.warn("reject");
-                actions.reject();
-              }
-
-              // This needs to be called in order to update the state of the
-              // PayPal modal. If the .resolve method is not called, the PayPal
-              // modal will just keep spinning.
-              actions.resolve({
-                resultCode,
-                action,
-                order,
-              });
+              if (resultCode == 'Pending') {
+                // This needs to be called in order to update the state of the
+                // PayPal modal. If it is not called, the PayPal modal will just
+                // // keep spinning.
+                  component.handleAction(response.action)
+                } else {
+                  // Handle any other result code status.
+                }
             }
           } catch (error) {
             console.error(error);
-            actions.reject();
+            // actions.reject() does not appear to do anything with the PayPal component.
+            // actions.reject();
           }
         },
 
@@ -120,9 +116,9 @@ const Checkout = () => {
 
           setCapturedData(true);
           setDetailsMessage(
-            `Upon clicking 'Complete Purchase' in the PayPal modal, the following 
-             data is saved to storage and will be used to finalize the payment on 
-             the review page:`
+            `Upon clicking "Continue to Review Order" in the PayPal modal or
+            "Confirm" in the Venmo modal, the following data is saved to storage
+            and will be used to finalize the payment on the review page:`
           );
           setDetailsJson(state.data);
         },
@@ -164,7 +160,7 @@ const Checkout = () => {
             value: parseInt(amountRef.current.value),
             currency: "USD",
           },
-          userAction: 'continue'
+          userAction: 'continue',
         };
 
         payPalRef.current = new PayPal(checkout.current, payPalConfiguration);

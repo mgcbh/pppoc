@@ -64,6 +64,7 @@ const Checkout = () => {
         paymentMethodsResponse: paymentMethods,
         showPayButton: true,
         onSubmit: async (state, component, actions) => {
+          console.log('on submit')
           try {
             if (state.isValid) {
               const response = await fetch("/api/payments", {
@@ -77,29 +78,35 @@ const Checkout = () => {
                 }
               }).then(response => response.json());
 
-              const { action, order, resultCode } = response;
+              const { resultCode } = response;
 
               setSubmitMessage('Response from the call to the /payments API:')
               setSubmitJson(response);
 
-              if (!resultCode) {
-                console.warn("reject");
-                actions.reject();
+              if (resultCode == 'Pending') {
+              // This needs to be called in order to update the state of the
+              // PayPal modal. If it is not called, the PayPal modal will just
+              // // keep spinning.
+                component.handleAction(response.action)
+              } else {
+                // Handle any other result code status.
               }
-
-              actions.resolve({
-                resultCode,
-                action,
-                order
-              });
             }
           } catch (error) {
             console.error(error);
-            actions.reject();
+            // actions.reject() does not appear to do anything with the PayPal component.
+            // actions.reject();
           }
         },
         onAdditionalDetails: async (state, component, actions) => {
           try {
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            // This is where we would do any additional validation on our end.
+            // If there are any issues with the order, we can call
+            // actions.reject() which will then trigger onPaymentFailed and halt
+            // any further processing. Or we can simply not proceed since by
+            // this point the PayPal modal has already closed.
+
             // Make a POST /payments/details request from your server.
             const response = await fetch("/api/payments/details", {
               method: "POST",
@@ -127,8 +134,10 @@ const Checkout = () => {
               donationToken
             } = response;
 
-            // If the /payments/details request request form your server is successful, you must call this to resolve whichever of the listed objects are available.
-            // You must call this, even if the result of the payment is unsuccessful.
+            // If the /payments/details request request form your server is
+            // successful, you must call this to resolve whichever of the listed
+            // objects are available. You must call this, even if the result of
+            // the payment is unsuccessful.
             actions.resolve({
               resultCode,
               action,
@@ -178,6 +187,17 @@ const Checkout = () => {
             value: parseInt(amountRef.current.value),
             currency: "USD"
           },
+          onClick: (data, actions) => {
+            // Thie handler does not seem to do anything useful. Returning
+            // actions.reject() immediately closes the PayPal window, but
+            // otherwise as part of an async function it does nothing and
+            // onSubmit is called immediately.
+            console.log('clicked')
+          },
+          onInit: () => {
+            console.log('initialized')
+          },
+          
         }
 
         payPalRef.current = new PayPal(checkout.current, payPalConfiguration);
