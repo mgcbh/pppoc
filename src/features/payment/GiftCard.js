@@ -29,6 +29,7 @@ const Checkout = () => {
   const amountRef = useRef(null);
   const [count, setCount] = useState(1);
   const checkout = useRef(null);
+  const giftCardData = useRef([]);
 
   const countArray = Array(count).fill().map((x, i) => i);
 
@@ -44,8 +45,13 @@ const Checkout = () => {
         // Add other payment method components that you want to show to the shopper
       },
       onChange: (state, component) => {
-        console.log('giftCard state:')
-        console.log(state);
+        if (state.isValid) {
+          const key = component["_id"];
+          const found = giftCardData.current.findIndex((item) => item.id === key);
+          if (found === -1) {
+            giftCardData.current = [...giftCardData.current, { ...state.data, id: key }];
+          }
+        }
       },
       onBalanceCheck: async (resolve, reject, data) => {
         console.log('onBalanceCheck: ', data)
@@ -91,7 +97,7 @@ const Checkout = () => {
         // checkout.update(paymentMethodsResponse, amount);
       }
     };
-    console.log(giftCardRef.current[number])
+
     if (!giftCardRef.current[number]?.current) {
       giftCardRef.current[number].current = new Giftcard(checkout.current, giftCardConfiguration);
 
@@ -128,7 +134,6 @@ const Checkout = () => {
   }, [payment, navigate])
 
   useEffect(() => {
-    console.log('length: ', count)
     if (count > 1) {
       createCard(count - 1)
     }
@@ -179,11 +184,18 @@ const Checkout = () => {
       {countArray.map((item, index) => {
         return (
           <div key={index} className="payment-container mb-5">
-            {console.log(`rendering ref #${index}`)}
             <div ref={paymentContainer.current[index]} className="payment"></div>
           </div>
         )
       })}
+
+      <div className="mb-3">
+        {giftCardData.current &&
+          giftCardData.current.map(data => {
+            return <Messages key={data.id} message={'Gift card data'} json={data} />
+          })
+        }
+      </div>
 
       <div className="mb-3">
         {(message && json) && (
