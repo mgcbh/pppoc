@@ -174,7 +174,7 @@ const Checkout = () => {
             try {
               const appendRequired = (element) => {
                 const required = document.createElement('span');
-                required.textContent = 'Required';
+                required.textContent = 'required';
                 required.classList.add('adyen-checkout__label__text', 'required');
                 element.after(required);
               }
@@ -216,7 +216,7 @@ const Checkout = () => {
 
   return (
     <div>
-      <div className="payment-container mb-5">
+      <div className="payment-container payment-container--cb mb-5">
         <div ref={paymentContainer} className="payment"></div>
       </div>
 

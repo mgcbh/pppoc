@@ -2,6 +2,11 @@
   --adyen-sdk-color-label-primary: #222222;
   --adyen-sdk-border-radius-m: 0;
   --adyen-sdk-color-outline-primary: #666666;
+  --adyen-sdk-text-body-font-weight: 600;
+}
+
+html, body {
+  font-family: "Helvetica Neue", Helvetica, Arial;
 }
 
 /* Additional custom styles for our "required" label. */
@@ -12,7 +17,7 @@
 
 .adyen-checkout__label__text {
   &.required {
-    color: grey;
+    color: #666;
     font-size: 10px;
   }
 }
@@ -22,6 +27,7 @@
   display: none;
 }
 
+/* CBCC card logo below the input field. */
 .adyen-checkout__card__brands__brand-wrapper.cbcc {
   border-radius:0;
 
@@ -30,6 +36,18 @@
   }
 }
 
+/* CBCC card logo inside the input field. */
 .adyen-checkout-card-input__icon.adyen-checkout__card__cardNumber__brandIcon.cbcc {
   border-radius: 0;
+}
+
+/* Misc. styles. */
+.payment-container--cb {
+  background-color: transparent;
+  padding: 0;
+  border: 0;
+
+  .payment {
+    padding: 0;
+  }
 }
