@@ -31,6 +31,10 @@ const Checkout = () => {
     setIncludePaymentMethods(false);
   }
 
+  const handleUnmount = () => {
+    cardRef.current.unmount();
+  }
+
   useEffect(() => {
     dispatch(initiateCheckout());
   }, [dispatch, includePaymentMethods])
@@ -125,12 +129,20 @@ const Checkout = () => {
       // The 'ignore' flag is used to avoid double re-rendering caused by React 18 StrictMode
       // More about it here: https://beta.reactjs.org/learn/synchronizing-with-effects#fetching-data
       if (paymentContainer.current && !ignore) {
+        // Just to prove we can change the styles in the iFrame.
+        // See https://docs.adyen.com/payment-methods/cards/custom-card-integration/#styling for all styles.
+        const styleObject = {
+          base: {
+            fontSize: '14px'
+          },
+        };
+
         const cardConfiguration = {
           // Optional configuration.
           billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
           showBrandIcon: true, // when false not showing the brand logo 
-          hasHolderName: true, // show holder name
-          holderNameRequired: true, // make holder name mandatory
+          hasHolderName: false, // show holder name
+          holderNameRequired: false, // make holder name mandatory
           // configure placeholders
           placeholders: {
             cardNumber: '1234 5678 9012 3456',
@@ -139,11 +151,54 @@ const Checkout = () => {
             securityCodeFourDigits: '1234',
             holderName: 'J. Smith'
           },
+          // Apply custom styling to iFramed input fields.
+          styles: styleObject,
+          onBinValue: (data) => {
+            const cardLogo = cardRef.current._node.querySelector('.adyen-checkout-card-input__icon');
+
+            // Pretend that CBCC cards start with 1.
+            if (data.binValue.substring(0, 1) === '1') {
+              console.log('yes')
+              // If a CBCC card is detected, update the logo in the card number input.  
+              cardLogo.classList.add('cbcc');
+              cardLogo.setAttribute('src', '/images/cbcc.svg');
+            } else {
+              if (cardLogo.classList.contains('cbcc')) {
+                cardLogo.setAttribute('src', '');
+                cardLogo.setAttribute('src', 'https://checkoutshopper-test.cdn.adyen.com/checkoutshopper/images/logos/nocard.svg');
+                cardLogo.classList.remove('cbcc');
+              }
+            }
+          },
+          onLoad: () => {
+            try {
+              const appendRequired = (element) => {
+                const required = document.createElement('span');
+                required.textContent = 'Required';
+                required.classList.add('adyen-checkout__label__text', 'required');
+                element.after(required);
+              }
+
+              const cardNumberLabel = cardRef.current._node.querySelector('[data-id="encryptedCardNumber"]');
+              const expiryDateLabel = cardRef.current._node.querySelector('[data-id="encryptedExpiryDate"]');
+              const securityCodeLabel = cardRef.current._node.querySelector('[data-id="encryptedSecurityCode"]');
+
+              appendRequired(cardNumberLabel);
+              appendRequired(expiryDateLabel);
+              appendRequired(securityCodeLabel);
+
+              // Prepend the CBCC card.
+              const card = cardRef.current._node.querySelector('.adyen-checkout__card__brands__brand-wrapper').cloneNode(true);
+              card.classList.add('cbcc');
+              card.firstChild.setAttribute('src', '/images/cbcc.svg');
+              cardRef.current._node.querySelector('.adyen-checkout__card__brands__brand-wrapper').before(card);
+            } catch (error) {
+              console.log('There was an issue with updating the DOM during onLoad.')
+            }
+          },
         }
 
-
         if (cardRef.current === null) {
-          console.log('creating new card')
           cardRef.current = new Card(checkout, cardConfiguration);
 
           // Mount the card component.
@@ -164,10 +219,13 @@ const Checkout = () => {
       <div className="payment-container mb-5">
         <div ref={paymentContainer} className="payment"></div>
       </div>
-      <button className="button button--small"
+
+      <button className="button mb-3"
         onClick={handleReset}>
-        Show what the component looks like when paymentMethodsResponse is omitted.
+        Reload without paymentMethodsResponse
       </button>
+
+      <button onClick={handleUnmount} className="button">Unmount the component</button>
     </div>
   );
 }

@@ -1,0 +1,35 @@
+.payment-container {
+  --adyen-sdk-color-label-primary: #222222;
+  --adyen-sdk-border-radius-m: 0;
+  --adyen-sdk-color-outline-primary: #666666;
+}
+
+/* Additional custom styles for our "required" label. */
+.adyen-checkout__label {
+  display: flex;
+  gap: 1rem;
+}
+
+.adyen-checkout__label__text {
+  &.required {
+    color: grey;
+    font-size: 10px;
+  }
+}
+
+/* Hide the "All fields are required..." message. */
+.adyen-checkout-form-instruction {
+  display: none;
+}
+
+.adyen-checkout__card__brands__brand-wrapper.cbcc {
+  border-radius:0;
+
+  img {
+    height: 100%;
+  }
+}
+
+.adyen-checkout-card-input__icon.adyen-checkout__card__cardNumber__brandIcon.cbcc {
+  border-radius: 0;
+}

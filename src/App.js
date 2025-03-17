@@ -14,6 +14,7 @@ import { PayPalContainer } from "./features/payment/PayPal";
 import { PayPalTwoStepContainer } from "./features/payment/PayPalTwoStep";
 import { GiftCardContainer } from "./features/payment/GiftCard";
 import "./App.css";
+import "./adyen-overrides.css";
 import { Home } from "./features/home/Home";
 
 const App = () => (

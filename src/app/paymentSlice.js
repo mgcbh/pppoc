@@ -18,10 +18,16 @@ export const slice = createSlice({
         value: 1000,
         currency: 'USD'
       },
-      // override Security Code label
+      // Override field labels
       translations: {
         'en-US': {
-          'creditCard.securityCode.label': 'CVV/CVC'
+          'creditCard.securityCode.label': 'CVC / CVV',
+          'creditCard.cardNumber.label': 'Card Number',
+          'creditCard.expiryDate.label': 'Expiry MM/YY',
+          // Hide help text.
+          'creditCard.expiryDate.contextualText': '',
+          'creditCard.securityCode.contextualText.3digits': '',
+          'creditCard.securityCode.contextualText.4digits': '',
         }
       },
     },

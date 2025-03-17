@@ -15,6 +15,13 @@ export const Home = () => {
     <div className="main-container">
       <ul className="integration-list mb-5">
         <li className="integration-list-item">
+          <Link to="/checkout/single-card" className="integration-list-item-link">
+            <div className="title-container">
+              <p className="integration-list-item-title">Single Card & Card Styling</p>
+            </div>
+          </Link>
+        </li>
+        <li className="integration-list-item">
           <Link to="/checkout/two-step" className="integration-list-item-link">
             <div className="title-container">
               <p className="integration-list-item-title">Two-Step Checkout</p>
@@ -67,11 +74,6 @@ export const Home = () => {
 
       <p>Other demos:</p>
       <ul>
-        <li>
-          <Link to="/checkout/single-card">
-            Single Card
-          </Link>
-        </li>
         <li>
           <Link to="/checkout/single-card-apply">
             Apply a Single Card
