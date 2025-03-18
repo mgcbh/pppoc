@@ -23,11 +23,14 @@ const Checkout = () => {
   const paymentContainer = useRef(null);
   const storedCardContainer = useRef(null);
   const storedCardMinimalContainer = useRef(null);
+  const verifyCardContainer = useRef(null);
   const cardRef = useRef(null);
   const storedCardRef = useRef(null);
   const storedCardRefData = useRef(null);
   const storedCardMinimalRef = useRef(null);
   const storedCardMinimalRefData = useRef(null);
+  const verifyCardRef = useRef(null);
+  const verifyCardRefData = useRef(null);
   const cardRefData = useRef(null);
   const [allStoredCards, setAllStoredCards] = useState([]);
   const [submitted, setSubmitted] = useState(0);
@@ -37,13 +40,25 @@ const Checkout = () => {
   const [storedMessage, setStoredMessage] = useState("");
   const [storedMinimalMessage, setStoredMinimalMessage] = useState("");
   const [storedDataMessage, setStoredDataMessage] = useState("");
+  const [verifyDataMessage, setVerifyDataMessage] = useState("");
   const [cardJson, setCardJson] = useState("");
   const [storedJson, setStoredJson] = useState({});
   const [storedMinimalJson, setStoredMinimalJson] = useState({});
   const [storedDataJson, setStoredDataJson] = useState({});
+  const [verifyDataJson, setVerifyDataJson] = useState({});
 
   const goToReview = () => {
     navigate("/review");
+  };
+
+  const handleApply = () => {
+    if (verifyCardRef.current.state.isValid) {
+      setVerifyDataMessage("The following will be saved to session storage and used in the final place order click:");
+      setVerifyDataJson(verifyCardRefData.current);
+    } else {
+      // If the payment method details are invalid, trigger the validation to focus on the missing field.
+      verifyCardRef.current.showValidation();
+    }
   };
 
   const verifyCard = async (component, componentData, exampleNumber) => {
@@ -225,6 +240,31 @@ const Checkout = () => {
           storedCardMinimalRef.current = new Card(checkout, storedPaymentMethod);
           storedCardMinimalRef.current.mount(storedCardMinimalContainer.current);
         }
+
+        if (verifyCardRef.current === null) {
+          const storedPaymentMethod = { ...checkout.paymentMethodsResponse.storedPaymentMethods[0] };
+          storedPaymentMethod.expiryMonth = "";
+          storedPaymentMethod.expiryYear = "";
+
+          storedPaymentMethod.onChange = (state, component) => {
+            verifyCardRefData.current = state.data;
+          };
+
+          storedPaymentMethod.onLoad = () => {
+            try {
+              const securityCodeLabel = verifyCardRef.current._node.querySelector('[data-id="encryptedSecurityCode"]');
+              securityCodeLabel.textContent = "Verify Security Code";
+            } catch (error) {
+              console.log("There was an issue with updating the DOM during onLoad.");
+            }
+          };
+
+          // Show the CVC for card verification
+          storedPaymentMethod.hideCVC = false;
+
+          verifyCardRef.current = new Card(checkout, storedPaymentMethod);
+          verifyCardRef.current.mount(verifyCardContainer.current);
+        }
       }
     };
 
@@ -333,7 +373,7 @@ const Checkout = () => {
         <p className="px-3">
           <b>Amount: $50.00</b>
         </p>
-        <p className="px-3">Enter the CVC to pay with or verify the stored card.</p>
+        <p className="px-3">Enter the CVC to pay with the stored card.</p>
         <div ref={storedCardMinimalContainer} className="payment"></div>
       </div>
 
@@ -370,6 +410,31 @@ const Checkout = () => {
           )}
         </button>
       </div>
+
+      <hr className="mt-3 mb-5" />
+
+      <h4 className="mb-3">Example 4: Pay With a Stored Card and Require CVV</h4>
+
+      <h5>Stored Card Component:</h5>
+      <div className="payment-container mb-5">
+        <p className="px-3">
+          <b>Card brand:</b> {allStoredCards[0]?.brand}
+          <br />
+          <b>Last four digits:</b> {allStoredCards[0]?.lastFour}
+          <br />
+          <b>Expiration:</b> {allStoredCards[0]?.expiryMonth} / {allStoredCards[0]?.expiryYear}
+        </p>
+
+        <div ref={verifyCardContainer} className="payment mb-3"></div>
+
+        <div className="m-3">
+          <button className="button" onClick={handleApply}>
+            Apply
+          </button>
+        </div>
+      </div>
+
+      {verifyDataMessage && verifyDataJson && <Messages message={verifyDataMessage} json={verifyDataJson} />}
     </div>
   );
 };
