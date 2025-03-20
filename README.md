@@ -3,7 +3,14 @@
 To run this demo:
 ```
 npm install
-npm run server
+```
+Then in two separate terminals run:
+```
+node server
+```
+...and...
+```
+npm run start
 ```
 ---
 
