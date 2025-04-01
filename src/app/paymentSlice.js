@@ -24,6 +24,7 @@ export const slice = createSlice({
           'creditCard.securityCode.label': 'CVC / CVV',
           'creditCard.cardNumber.label': 'Card Number',
           'creditCard.expiryDate.label': 'Expiry MM/YY',
+          'applyGiftcard': 'Apply',
           // Hide help text.
           'creditCard.expiryDate.contextualText': '',
           'creditCard.securityCode.contextualText.3digits': '',

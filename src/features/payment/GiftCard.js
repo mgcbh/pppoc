@@ -211,9 +211,11 @@ const Checkout = () => {
             <div ref={paymentContainer.current[index]} className="payment"></div>
             {giftCardData.current[index]?.submitted && (
               <div className="mx-3">
-                  Gift card has been applied.<br />
+                <p>Gift card #{index + 1} has been applied.</p>
+                <p className="mb-0">
                   <b>Last Four Digits:</b> {giftCardData.current[index]?.lastFour}<br />
                   <b>Balance:</b> ${(giftCardData.current[index]?.balance / 100).toFixed(2)}
+                </p>
               </div>
             )}
           </div>
