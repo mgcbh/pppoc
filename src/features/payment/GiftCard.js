@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { AdyenCheckout, Giftcard } from "@adyen/adyen-web";
@@ -26,6 +26,8 @@ const Checkout = () => {
   const [json, setJson] = useState({});
   const [messageResponse, setMessageResponse] = useState('');
   const [jsonResponse, setJsonResponse] = useState({});
+  const [paymentResponse, setPaymentResponse] = useState('');
+  const [paymentJsonResponse, setPaymentJsonResponse] = useState({});
   const amountRef = useRef(null);
   const [count, setCount] = useState(1);
   const checkout = useRef(null);
@@ -55,9 +57,15 @@ const Checkout = () => {
       },
       onBalanceCheck: async (resolve, reject, data) => {
         console.log('onBalanceCheck: ', data)
-        const reqBody = {
+
+        const balanceReqBody = {
           ...data,
           amount: parseInt(amountRef.current.value)
+        }
+
+        const paymentReqBody = {
+          ...data,
+          amount: 0
         }
 
         try {
@@ -66,19 +74,35 @@ const Checkout = () => {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(reqBody)
+            body: JSON.stringify(balanceReqBody)
           }).then(response => response.json());
+
+          giftCardData.current[number].balance = balanceResponse.balance.value;
 
           console.log('balance check response:');
           console.log(balanceResponse);
 
           setMessage('This data is used to check the gift card balance:')
-          setJson(reqBody);
+          setJson(balanceReqBody);
 
           setMessageResponse('Response from the call to check the gift card balance (/paymentMethods/balance):')
           setJsonResponse(balanceResponse);
 
           // resolve(balanceResponse);
+          const paymentResponse = await fetch("/api/payments", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentReqBody)
+
+          }).then(response => response.json());
+
+          setPaymentResponse('Response from the $0 auth call (/payments):')
+          setPaymentJsonResponse(paymentResponse);
+          giftCardData.current[number].lastFour = paymentResponse.additionalData.cardSummary;
+          giftCardData.current[number].submitted = true;
+          giftCardRef.current[number].current.unmount();
         } catch (error) {
           console.error(error);
           alert("Error occurred. Look at console for details");
@@ -185,6 +209,13 @@ const Checkout = () => {
         return (
           <div key={index} className="payment-container mb-5">
             <div ref={paymentContainer.current[index]} className="payment"></div>
+            {giftCardData.current[index]?.submitted && (
+              <div className="mx-3">
+                  Gift card has been applied.<br />
+                  <b>Last Four Digits:</b> {giftCardData.current[index]?.lastFour}<br />
+                  <b>Balance:</b> ${(giftCardData.current[index]?.balance / 100).toFixed(2)}
+              </div>
+            )}
           </div>
         )
       })}
@@ -206,6 +237,12 @@ const Checkout = () => {
       <div className="mb-3">
         {(messageResponse && jsonResponse) && (
           <Messages message={messageResponse} json={jsonResponse} />
+        )}
+      </div>
+
+      <div className="mb-3">
+        {(paymentResponse && paymentJsonResponse) && (
+          <Messages message={paymentResponse} json={paymentJsonResponse} />
         )}
       </div>
 
