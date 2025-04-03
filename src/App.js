@@ -13,6 +13,7 @@ import { ApplePayContainer } from "./features/payment/ApplePay";
 import { PayPalContainer } from "./features/payment/PayPal";
 import { PayPalTwoStepContainer } from "./features/payment/PayPalTwoStep";
 import { GiftCardContainer } from "./features/payment/GiftCard";
+import { AffirmContainer } from "./features/payment/Affirm";
 import "./App.css";
 import "./adyen-overrides.css";
 import { Home } from "./features/home/Home";
@@ -35,6 +36,7 @@ const App = () => (
         <Route path="/checkout/apple-pay" element={<ApplePayContainer />} />
         <Route path="/checkout/paypal" element={<PayPalContainer />} />
         <Route path="/checkout/paypal-two-step" element={<PayPalTwoStepContainer />} />
+        <Route path="/checkout/affirm" element={<AffirmContainer />} />
         <Route path="/status/:type" element={<StatusContainer />} />
         <Route path="/redirect" element={<RedirectContainer />} />
         <Route path="/review" element={<ReviewContainer />} />

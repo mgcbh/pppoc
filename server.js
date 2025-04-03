@@ -215,10 +215,14 @@ app.post("/api/placeorder", async (req, res) => {
       recurringProcessingModel: req.body.recurringProcessingModel,
       // we strongly recommend that you the billingAddress in your request.
       // card schemes require this for channel web, iOS, and Android implementations.
-      // billingAddress:
-      //   typeof req.body.billingAddress === "undefined" || Object.keys(req.body.billingAddress).length === 0
-      //     ? null
-      //     : req.body.billingAddress,
+      billingAddress:
+        typeof req.body.billingAddress === "undefined" || Object.keys(req.body.billingAddress).length === 0
+          ? null
+          : req.body.billingAddress,
+      deliveryAddress:
+          typeof req.body.deliveryAddress === "undefined" || Object.keys(req.body.deliveryAddress).length === 0
+            ? null
+            : req.body.deliveryAddress,          
       deliveryDate: new Date("2017-07-17T13:42:40.428+01:00"),
       shopperStatement: "Aceitar o pagamento até 15 dias após o vencimento.Não cobrar juros. Não aceitar o pagamento com cheque",
       // below fields are required for Klarna, line items included
@@ -226,6 +230,8 @@ app.post("/api/placeorder", async (req, res) => {
       shopperInteraction: req.body.shopperInteraction,
       shopperReference: req.body.shopperReference ? req.body.shopperReference : '12345',
       shopperEmail: "youremail@email.com",
+      shopperName: req.body.shopperName,
+      telephoneNumber: req.body.telephoneNumber,
       shopperLocale: "en_US",
       lineItems: [
         {quantity: 1, amountIncludingTax: 5000 , description: "Sunglasses"},

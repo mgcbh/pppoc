@@ -50,6 +50,13 @@ export const Home = () => {
           </Link>
         </li>
         <li className="integration-list-item">
+          <Link to="/checkout/affirm" className="integration-list-item-link">
+            <div className="title-container">
+              <p className="integration-list-item-title">Affirm</p>
+            </div>
+          </Link>
+        </li>
+        <li className="integration-list-item">
           <Link to="/checkout/apple-pay" className="integration-list-item-link">
             <div className="title-container">
               <p className="integration-list-item-title">Apple Pay</p>
