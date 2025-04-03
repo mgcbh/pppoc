@@ -37,7 +37,7 @@ const Checkout = () => {
     if (affirmRef.current.state.isValid) {
       const affirmData = {
         ...affirmRefData.current,
-        amount: parseInt(amountRef.current.value),
+        amount: parseInt(amountRef.current.value * 100),
       };
       setMessage('The following will be saved to session storage and used in the final place order click. It could also be saved to the back end if necessary.');
       setJson(affirmData);

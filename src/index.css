@@ -68,7 +68,7 @@ a:hover {
 }
 
 .button:disabled {
-  background: #e6e9eb;
+  background: #8892a1;
   box-shadow: none;
   cursor: not-allowed;
   -webkit-user-select: all;

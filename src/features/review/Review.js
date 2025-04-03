@@ -16,6 +16,7 @@ export const ReviewContainer = () => {
   const [submitted, setSubmitted] = useState(false);
   const [resultMessage, setResultMessage] = useState('');
   const [resultJson, setResultJson] = useState({});
+  const [hasAction, setHasAction] = useState(false);
   const paymentContainer = useRef(null);
   const checkoutRef = useRef(null);
   const resultCodeRef = useRef(null);
@@ -141,6 +142,7 @@ export const ReviewContainer = () => {
     // See https://docs.adyen.com/online-payments/two-step-checkout/#implement-a-review-page
     // and https://docs.adyen.com/online-payments/build-your-integration/advanced-flow/?platform=Web&integration=Components&version=6.5.1#additional-action
     if (action) {
+      setHasAction(true);
       setTimeout(() => {
         checkoutRef.current.createFromAction(action).mount(paymentContainer.current);
       }, 5000);
@@ -198,9 +200,13 @@ export const ReviewContainer = () => {
           {resultMessage && resultJson && <Messages message={resultMessage} json={resultJson} />}
 
           {!cardDataTwo &&
-            <button className="button" onClick={submitted ? handleRedirect : handlePlaceOrder}>
+            <button disabled={hasAction} className="button" onClick={submitted ? handleRedirect : handlePlaceOrder}>
               {!submitted && (<>Place Order</>)}
-              {submitted && <>Order Placed<br />(click again to proceed)</>}
+              {submitted && <>Order Placed
+                {!hasAction && (<><br />(click again to proceed)</>)}
+                {hasAction && (<><br />(wait for additional action)</>)}
+              </>
+              }
             </button>
           }
 
