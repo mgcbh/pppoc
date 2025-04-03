@@ -46,6 +46,8 @@ const Checkout = () => {
   const [storedMinimalJson, setStoredMinimalJson] = useState({});
   const [storedDataJson, setStoredDataJson] = useState({});
   const [verifyDataJson, setVerifyDataJson] = useState({});
+  const [verifyResultMessage, setVerifyResultMessage] = useState("")
+  const [verifyResultJson, setVerifyResultJson] = useState({});
 
   const goToReview = () => {
     navigate("/review");
@@ -84,10 +86,6 @@ const Checkout = () => {
 
       console.log(response);
       setSubmitted(3);
-      // sessionStorage.removeItem('cardData');
-
-      // const { action, resultCode, pspReference } = response;
-      // resultCodeRef.current = resultCode;
     }
   };
 
@@ -117,7 +115,7 @@ const Checkout = () => {
     }
   };
 
-  const handleGoToReview = () => {
+  const handleGoToReview = async (verify = false) => {
     // Validate the shopper input in the payment form.
     if (cardRef.current.state.isValid) {
       const cardData = {
@@ -127,16 +125,32 @@ const Checkout = () => {
         shopperReference: "pocShopper",
         amount: 5000,
       };
-      setCardMessage("The following data will be saved to the user`s stored cards and also used for processing the payment:");
-      setCardJson(cardData);
-      setSubmitted(1);
 
-      // Store the payment data to use in the /payments request.
-      // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
-      sessionStorage.setItem("cardData", JSON.stringify(cardData));
+      // Perform a $0 auth to verify the card/token.
+      if (verify) {
+        cardData.amount = 0;
+        const response = await fetch("/api/placeorder", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(cardData),
+        }).then((response) => response.json());
 
-      // Go to the review page. Commenting out so that we can do it manually instead for POC purposes.
-      // goToReview();
+        setVerifyResultMessage("$0 auth payment response is below.");
+        setVerifyResultJson(response);
+      } else {
+        setCardMessage("The following data will be saved to the user`s stored cards and also used for processing the payment:");
+        setCardJson(cardData);
+        setSubmitted(1);
+
+        // Store the payment data to use in the /payments request.
+        // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
+        sessionStorage.setItem("cardData", JSON.stringify(cardData));
+
+        // Go to the review page. Commenting out so that we can do it manually instead for POC purposes.
+        // goToReview();
+      }
     } else {
       // If the payment method details are invalid, trigger the validation to focus on the missing field.
       cardRef.current.showValidation();
@@ -180,8 +194,9 @@ const Checkout = () => {
           // Optional configuration.
           billingAddressRequired: false, // when true show the billing address input fields and mark them as required.
           showBrandIcon: true, // when false not showing the brand logo
-          hasHolderName: true, // show holder name
-          holderNameRequired: true, // make holder name mandatory
+          hasHolderName: false, // show holder name
+          holderNameRequired: false, // make holder name mandatory
+          // hideCVC: true,
           // configure placeholders
           placeholders: {
             cardNumber: "1234 5678 9012 3456",
@@ -278,21 +293,23 @@ const Checkout = () => {
   return (
     <div className="mw-100">
       <h4>
-        Example 1: Pay and Store a Card
-        <br />
-        (Generate a Token)
+        Example 1: Pay and Store a Card or Verify a Stored Card (Generate a Token)
       </h4>
-      <div className="payment-container mb-5">
+      <div className="payment-container mb-3">
         <p className="px-3">
-          <b>Amount: $50.00</b>
+          Enter your card number, expiration and security code.
         </p>
         <div ref={paymentContainer} className="payment mb-3"></div>
       </div>
 
       {cardMessage && cardJson && <Messages message={cardMessage} json={cardJson} />}
+      {verifyResultMessage && verifyResultJson && <Messages message={verifyResultMessage} json={verifyResultJson} />}
 
-      <div>
-        <button className="button" onClick={submitted === 1 ? goToReview : handleGoToReview}>
+      <div className="mb-3">
+        <p className="pb-1">
+          For newly stored cards, the payment response will include a token and will be stored and associated with user <code>pocShopper</code>.
+        </p>
+        <button className="button" onClick={(event) => submitted === 1 ? goToReview() : handleGoToReview(false)}>
           Continue to Review Page - pay and store card
           {submitted === 1 && (
             <span>
@@ -301,9 +318,12 @@ const Checkout = () => {
             </span>
           )}
         </button>
-        <p className="py-4">
-          The payment response will include a token and will be stored and associated with user <code>pocShopper</code>.
-        </p>
+      </div>
+      <p className="mb-3">(or)</p>
+      <div>
+        <button className="button" onClick={() => handleGoToReview(true)}>
+          Verify Card with $0 auth
+        </button>
       </div>
 
       <hr className="mt-3 mb-5" />
@@ -344,8 +364,8 @@ const Checkout = () => {
             submitted === 2
               ? goToReview
               : () => {
-                  handleGoToReviewStored(storedCardRef.current, storedCardRefData.current, 2);
-                }
+                handleGoToReviewStored(storedCardRef.current, storedCardRefData.current, 2);
+              }
           }
         >
           Continue to Review Page - pay with stored card
@@ -397,8 +417,8 @@ const Checkout = () => {
             submitted === 3
               ? goToReview
               : () => {
-                  handleGoToReviewStored(storedCardMinimalRef.current, storedCardMinimalRefData.current, 3);
-                }
+                handleGoToReviewStored(storedCardMinimalRef.current, storedCardMinimalRefData.current, 3);
+              }
           }
         >
           Continue to Review Page - pay with stored card
