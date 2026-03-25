@@ -28,6 +28,10 @@ export const RedirectContainer = () => {
           }
         }).then(response => response.json());
 
+        if (response.paymentMethod.type === "affirm" && response.resultCode === "Authorised") {
+          localStorage.setItem("affirmResult", "success")
+        }
+
         const { pspReference, resultCode } = response;
 
         navigate(getRedirectUrl(resultCode), { replace: true });

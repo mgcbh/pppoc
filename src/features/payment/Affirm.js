@@ -29,7 +29,7 @@ const Checkout = () => {
   const [json, setJson] = useState({});
 
   const goToReview = () => {
-    navigate('/review');
+    navigate('/review-affirm');
   }
 
   const handleContinue = () => {
@@ -44,7 +44,7 @@ const Checkout = () => {
 
       // Store the payment data to use in the /payments request.
       // Here we may decide to post this data to the back end instead of just saving to sessionStorage.
-      sessionStorage.setItem('cardData', JSON.stringify(affirmData));
+      sessionStorage.setItem('affirmData', JSON.stringify(affirmData));
       setSubmitted(true);
 
       // Go to the review page. Commenting out so that we can do it manually instead for POC purposes.

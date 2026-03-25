@@ -52,7 +52,7 @@ export const Home = () => {
         <li className="integration-list-item">
           <Link to="/checkout/affirm" className="integration-list-item-link">
             <div className="title-container">
-              <p className="integration-list-item-title">Affirm</p>
+              <p className="integration-list-item-title">Affirm (BNPL)</p>
             </div>
           </Link>
         </li>

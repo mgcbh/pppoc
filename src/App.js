@@ -7,6 +7,7 @@ import { TwoCardsContainer } from "./features/payment/TwoCards";
 import { TwoStepContainer } from "./features/payment/TwoStep";
 import { StatusContainer } from "./features/status/Status";
 import { ReviewContainer } from "./features/review/Review";
+import { ReviewAffirmContainer } from "./features/review/ReviewAffirm";
 import { ReviewPayPalContainer } from "./features/review/ReviewPayPal";
 import { StoredCardsContainer } from "./features/payment/StoredCards";
 import { ApplePayContainer } from "./features/payment/ApplePay";
@@ -40,6 +41,7 @@ const App = () => (
         <Route path="/status/:type" element={<StatusContainer />} />
         <Route path="/redirect" element={<RedirectContainer />} />
         <Route path="/review" element={<ReviewContainer />} />
+        <Route path="/review-affirm" element={<ReviewAffirmContainer />} />
         <Route path="/review-paypal" element={<ReviewPayPalContainer />} />
         <Route path="/" element={<Home />} />
       </Routes>
